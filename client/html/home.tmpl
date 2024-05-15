@@ -1,0 +1,14 @@
+{{ define "content" }}
+<main>
+    <h1>Artiklar</h1>
+    {{ range .articles }}
+        <a href={{.Name}}>
+            {{.Coverimage}}
+            <h3>{{.Name}}</h3>
+            <p>{{.Date}}</p>
+            <br>
+        </a>
+        <br>
+    {{ end }}
+</main>
+{{ end }}
