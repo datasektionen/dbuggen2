@@ -1,0 +1,61 @@
+CREATE SCHEMA Archive;
+
+CREATE TABLE IF NOT EXISTS Archive.Issue (
+    id              INT UNSIGNED PRIMARY KEY,
+    title           VARCHAR(255) NOT NULL,
+    publishing_date DATE NOT NULL,
+    pdf             INT UNSIGNED,
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    html            INT UNSIGNED,
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    views           INT UNSIGNEDm
+);
+
+CREATE TABLE IF NOT EXISTS Archive.Article (
+    id          INT UNSIGNED PRIMARY KEY,
+    issue       INT UNSIGNED
+        REFERENCES Archive.Issue
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    content     TEXT NOT NULL,
+    issue_index INT UNSIGNED,
+    last_edited DATE NOT NULL,
+);
+
+CREATE TYPE external_type AS ENUM (
+    "pdf",
+    "html",
+    "image",
+);
+
+CREATE TABLE IF NOT EXISTS Archive.External (
+    id               INT UNSIGNED PRIMARY KEY,
+    hosted_url       TEXT NOT NULL,
+    type_of_external EXTERNAL_TYPE NOT NULL,
+);
+
+CREATE TABLE IF NOT EXISTS Archive.PictureUsedInArticle (
+    article_id INT UNSIGNED
+        REFERENCES Archive.Article
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    picture_id INT UNSIGNED
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    PRIMARY KEY(article_id, picture_id)
+)
+
+CREATE TABLE IF NOT EXISTS Archive.Member (
+    id        INT UNSIGNED PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    title     VARCHAR(255),
+    picture   INT UNSIGNED
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+);
