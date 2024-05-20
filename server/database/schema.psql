@@ -1,61 +1,76 @@
+DROP SCHEMA IF EXISTS Archive CASCADE;
 CREATE SCHEMA Archive;
 
 CREATE TABLE IF NOT EXISTS Archive.Issue (
-    id              INT UNSIGNED PRIMARY KEY,
+    id              INT PRIMARY KEY,
     title           VARCHAR(255) NOT NULL,
     publishing_date DATE NOT NULL,
-    pdf             INT UNSIGNED,
+    pdf             INT
         REFERENCES Archive.External
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    html            INT UNSIGNED,
+    html            INT
         REFERENCES Archive.External
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    views           INT UNSIGNEDm
+    views           INT
 );
 
 CREATE TABLE IF NOT EXISTS Archive.Article (
-    id          INT UNSIGNED PRIMARY KEY,
-    issue       INT UNSIGNED
+    id          INT PRIMARY KEY,
+    issue       INT
         REFERENCES Archive.Issue
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    content     TEXT NOT NULL,
-    issue_index INT UNSIGNED,
+    author_text TEXT, -- if you want something else than their names
+    issue_index INT, -- The index of the article in the issue
+    content     TEXT NOT NULL, -- The article in markdown format
     last_edited DATE NOT NULL,
+    n0lle_safe  BOOLEAN NOT NULL -- If it's safe for nØllan to read
 );
 
 CREATE TYPE external_type AS ENUM (
-    "pdf",
-    "html",
-    "image",
+    'pdf',
+    'html',
+    'image'
 );
 
 CREATE TABLE IF NOT EXISTS Archive.External (
-    id               INT UNSIGNED PRIMARY KEY,
+    id               INT PRIMARY KEY,
     hosted_url       TEXT NOT NULL,
-    type_of_external EXTERNAL_TYPE NOT NULL,
+    type_of_external EXTERNAL_TYPE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Archive.PictureUsedInArticle (
-    article_id INT UNSIGNED
+    article_id INT
         REFERENCES Archive.Article
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    picture_id INT UNSIGNED
+    picture_id INT
         REFERENCES Archive.External
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     PRIMARY KEY(article_id, picture_id)
-)
+);
 
 CREATE TABLE IF NOT EXISTS Archive.Member (
-    id        INT UNSIGNED PRIMARY KEY,
-    full_name VARCHAR(255) NOT NULL,
+    kth_id    VARCHAR(255) PRIMARY KEY,
     title     VARCHAR(255),
-    picture   INT UNSIGNED
+    picture   INT
         REFERENCES Archive.External
         ON UPDATE CASCADE
         ON DELETE SET NULL,
+    active    BOOLEAN NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Archive.AuthoredBy (
+    article_id  INT
+        REFERENCES Archive.Article
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    member_id   VARCHAR(255)
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    PRIMARY KEY(article_id, member_id)
 );
