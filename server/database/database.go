@@ -1,28 +1,28 @@
 package database
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 
-	// "github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-type Member struct {
-	kth_id string
-	title  string
-	active bool
-}
-
-func DatabaseDo(db_url string) {
-	db, err := sql.Open("postgres", db_url)
+func Start(db_url string) *sqlx.DB {
+	db, err := sqlx.Connect("postgres", db_url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
-	if db.Ping() != nil {
-		fmt.Println("AAAAAAAAHH!")
+	return db
+}
+
+func GetIssues(db *sqlx.DB) []Issue {
+	issues := []Issue{}
+
+	err := db.Select(&issues, "SELECT * FROM Archive.Issue")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	return issues
 }

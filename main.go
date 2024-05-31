@@ -1,13 +1,13 @@
 package main
 
 import (
-	// "dbuggen/server"
 	"dbuggen/config"
+	"dbuggen/server"
 	"dbuggen/server/database"
 )
 
 func main() {
-	// server.Start()
 	conf := config.GetConfig()
-	database.DatabaseDo(conf.DATABASE_URL)
+	db := database.Start(conf.DATABASE_URL)
+	server.Start(db)
 }

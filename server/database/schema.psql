@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS Archive.Issue (
         REFERENCES Archive.External
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    views           INT
+    views           INT,
+        CHECK (views >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS Archive.Article (

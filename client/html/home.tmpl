@@ -1,9 +1,9 @@
 {{ define "content" }}
 <main>
-    <h1>Artiklar</h1>
-    {{ range .articles }}
+    <h1>dbuggen</h1>
+    {{ range .issues }}
         <a href={{.Name}}>
-            {{.Coverimage}}
+            <img src={{.Coverimage}}>
             <h3>{{.Name}}</h3>
             <p>{{.Date}}</p>
             <br>

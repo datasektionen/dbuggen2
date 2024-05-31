@@ -5,7 +5,7 @@ INSERT INTO Archive.Member VALUES ('testsupp', 'slave', NULL, TRUE);
 INSERT INTO Archive.External VALUES (1, 'https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/marke.png', 'image');
 INSERT INTO Archive.External VALUES (2, 'https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/dbuggen-var-2024.pdf', 'pdf');
 
-INSERT INTO Archive.Issue VALUES (0, 'Testdbuggen', '2024-02-23', 3, NULL, NULL, 0);
+INSERT INTO Archive.Issue VALUES (0, 'Testdbuggen', '2024-02-23', 2, NULL, NULL, 0);
 INSERT INTO Archive.Article VALUES (0, 'ledare', 0, NULL, 0, '# Hur man är cool \n det här är **kul**.', '2024-02-23', TRUE);
 
 INSERT INTO Archive.AuthoredBy VALUES (0, 'frblo');
