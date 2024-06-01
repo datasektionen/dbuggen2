@@ -2,10 +2,10 @@
 <main>
     <h1>dbuggen</h1>
     {{ range .issues }}
-        <a href={{.Name}}>
+        <a href={{.Title}}>
             <img src={{.Coverimage}}>
-            <h3>{{.Name}}</h3>
-            <p>{{.Date}}</p>
+            <h3>{{.Title}}</h3>
+            <p>{{.PublishingDate}}</p>
             <br>
         </a>
         <br>

@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS Archive.Article (
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     author_text TEXT, -- if you want something else than their names
-    issue_index INT, -- The index of the article in the issue
+    issue_index INT NOT NULL, -- The index of the article in the issue
     content     TEXT NOT NULL, -- The article in markdown format
     last_edited DATE NOT NULL,
     n0lle_safe  BOOLEAN NOT NULL -- If it's safe for nØllan to read
