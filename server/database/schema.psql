@@ -60,13 +60,14 @@ CREATE TABLE IF NOT EXISTS Archive.PictureUsedInArticle (
 );
 
 CREATE TABLE IF NOT EXISTS Archive.Member (
-    kth_id    VARCHAR(255) PRIMARY KEY,
-    title     VARCHAR(255),
-    picture   INT
+    kth_id          VARCHAR(255) PRIMARY KEY,
+    title           VARCHAR(255),
+    prefered_name   VARCHAR(255), -- If they would like some other name than their real one
+    picture         INT
         REFERENCES Archive.External
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    active    BOOLEAN NOT NULL
+    active          BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Archive.AuthoredBy (
@@ -74,9 +75,9 @@ CREATE TABLE IF NOT EXISTS Archive.AuthoredBy (
         REFERENCES Archive.Article
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    member_id   VARCHAR(255)
+    kth_id   VARCHAR(255)
         REFERENCES Archive.Member
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    PRIMARY KEY(article_id, member_id)
+    PRIMARY KEY(article_id, kth_id)
 );

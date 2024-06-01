@@ -57,3 +57,15 @@ func GetArticle(db *sqlx.DB, issueID int, index int) Article {
 
 	return article
 }
+
+func GetAuthors(db *sqlx.DB, article int) []Author {
+	var authors []Author
+	err := db.Select(&authors, `SELECT kth_id, prefered_name FROM
+							(Archive.Member LEFT JOIN Archive.AuthoredBy USING(kth_id))
+							WHERE article_id=$1`, article)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return authors
+}

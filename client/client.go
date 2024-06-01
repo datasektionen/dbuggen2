@@ -1,6 +1,8 @@
 package client
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"dbuggen/server/database"
+	"io"
 )
 
 // Home page
@@ -43,14 +46,67 @@ func Article(db *sqlx.DB) func(c *gin.Context) {
 		articleIndex := pathIntSeparator(c.Param("article"))
 
 		article := database.GetArticle(db, issueID, articleIndex)
+		authors := database.GetAuthors(db, article.ID)
 
 		c.HTML(http.StatusOK, "article.tmpl", gin.H{
 			"pagetitle":      article.Title,
 			"title":          article.Title,
-			"authors":        article.AuthorText,
+			"authors":        authortext(article.AuthorText, authors),
 			"articleContent": mdToHTML(article.Content),
 		})
 	}
+}
+
+func authortext(AuthorText sql.NullString, authors []database.Author) string {
+	if AuthorText.Valid {
+		return AuthorText.String
+	}
+
+	var sb strings.Builder
+	sb.WriteString("Skriven av ")
+
+	sb.WriteString(authorsName(authors[0]))
+	if len(authors) == 1 {
+		return sb.String()
+	}
+
+	for i := 1; i < len(authors)-1; i++ {
+		sb.WriteString(fmt.Sprintf(", %v", authorsName(authors[i])))
+	}
+
+	sb.WriteString(fmt.Sprintf(" och %v", authorsName(authors[len(authors)-1])))
+	return sb.String()
+}
+
+func authorsName(a database.Author) string {
+	if a.PreferedName.Valid {
+		return a.PreferedName.String
+	}
+
+	resp, err := http.Get(fmt.Sprintf("https://hodis.datasektionen.se/uid/%v", a.KthID))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		log.Fatalf("unexpected http GET status from hodis: %v", resp.StatusCode)
+	}
+
+	contents, err := io.ReadAll(io.Reader(resp.Body))
+	if err != nil {
+		log.Fatal(err)
+	}
+	m := make(map[string]interface{})
+	errg := json.Unmarshal(contents, &m)
+	if errg != nil {
+		log.Fatal(err)
+	}
+
+	displayName, ok := m["displayName"].(string)
+	if !ok {
+		log.Fatal("Failed to convert displayName to string")
+	}
+	return displayName
 }
 
 // Function to remove the "/" before parameters, which was

@@ -10,7 +10,7 @@ import (
 
 // Converts a string of markdown text into a html template
 func mdToHTML(md string) template.HTML {
-	extentions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	extentions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.MathJax
 	p := parser.NewWithExtensions(extentions)
 	doc := p.Parse([]byte(md))
 

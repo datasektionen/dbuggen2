@@ -31,3 +31,8 @@ type Article struct {
 	LastEdited time.Time `db:"last_edited"`
 	N0lleSafe  bool      `db:"n0lle_safe"`
 }
+
+type Author struct {
+	KthID        string         `db:"kth_id"`
+	PreferedName sql.NullString `db:"prefered_name"`
+}
