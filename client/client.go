@@ -12,12 +12,12 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"dbuggen/server/database"
-	db "dbuggen/server/database"
 )
 
 // Home page
-func Home(issuesRaw []db.Issue) func(c *gin.Context) {
+func Home(issuesRaw []database.Issue) func(c *gin.Context) {
 	type RelevantIssue struct {
+		IssueID        string
 		Title          string
 		PublishingDate time.Time
 		Coverimage     string
@@ -25,15 +25,13 @@ func Home(issuesRaw []db.Issue) func(c *gin.Context) {
 
 	var issues []RelevantIssue
 	for _, iss := range issuesRaw {
-		issues = append(issues, RelevantIssue{iss.Title, iss.PublishingDate, "https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/marke.png"})
+		issues = append(issues, RelevantIssue{fmt.Sprintf("issue/%v/0", iss.ID), iss.Title, iss.PublishingDate, "https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/marke.png"})
 	}
 
 	return func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		c.HTML(http.StatusOK, "home.tmpl", gin.H{
 			"pagetitle": "dbuggen",
-			"content":   "hcontent",
-			// Specific for home.tmpl ↓
-			"issues": issues,
+			"issues":    issues,
 		})
 	}
 }
@@ -45,15 +43,12 @@ func Article(db *sqlx.DB) func(c *gin.Context) {
 		articleIndex := pathIntSeparator(c.Param("article"))
 
 		article := database.GetArticle(db, issueID, articleIndex)
-		fmt.Println(article.Content)
 
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"pagetitle": article.Title,
-			"content":   "acontent",
-			// Specific for article.tmpl ↓
+		c.HTML(http.StatusOK, "article.tmpl", gin.H{
+			"pagetitle":      article.Title,
 			"title":          article.Title,
 			"authors":        article.AuthorText,
-			"articleContent": article.Content,
+			"articleContent": mdToHTML(article.Content),
 		})
 	}
 }

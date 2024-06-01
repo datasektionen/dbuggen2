@@ -2,18 +2,12 @@
 	This is the standard html layout of all pages. It contains the necessary
 	things for all pages. The rest is handled in client.go 
 -->
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>{{ .pagetitle }}</title>
-		<link rel="stylesheet" href="/css/index.css"> <!-- The CSS -->
-		<link rel="icon" href="/assets/favicon.png"> <!-- The favicon -->
-		<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script> <!-- HTMX -->
-	</head>
-	<body>
-        {{ template "navbar" . }} <!-- The navbar -->
-		<div class="content">
-            {{ block "content" .}}{{ end }} <!-- Page content, basically everything else -->
-        </div>
-	</body>
-</html>
+{{define "index"}}
+<head>
+	<title>{{ .pagetitle }}</title>
+	<link rel="stylesheet" href="/css/index.css"> <!-- The CSS -->
+	<link rel="icon" href="/assets/favicon.png"> <!-- The favicon -->
+	<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script> <!-- HTMX -->
+</head>
+{{ template "navbar" . }} <!-- The navbar -->
+{{end}}

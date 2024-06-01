@@ -2,6 +2,7 @@ package server
 
 import (
 	"html/template"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -20,15 +21,11 @@ func Start(db *sqlx.DB) {
 	r.Static("assets", "assets")
 
 	r.GET("/", client.Home(database.GetIssues(db)))
-	r.GET("issue/:issue/*article", client.Article(db))
+	r.GET("issue/:issue/:article", client.Article(db))
 
 	r.NoRoute(func(c *gin.Context) {
-		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
 	r.Run()
 }
-
-// func article(db *sqlx.DB) func(c *gin.Context) {
-// 	return client.Article(db)
-// }
