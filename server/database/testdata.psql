@@ -1,0 +1,20 @@
+INSERT INTO Archive.External VALUES (0, 'https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/FredrikhotarFredrik.png', 'image');
+INSERT INTO Archive.Member VALUES ('frblo', 'chefred', NULL, 0, TRUE);
+INSERT INTO Archive.Member VALUES ('testsupp', 'slave', 'BULL', NULL, TRUE);
+
+INSERT INTO Archive.External VALUES (1, 'https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/marke.png', 'image');
+INSERT INTO Archive.External VALUES (2, 'https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/dbuggen-var-2024.pdf', 'pdf');
+
+INSERT INTO Archive.Issue VALUES (0, 'Testdbuggen', '2024-02-23', 2, NULL, NULL, 0);
+INSERT INTO Archive.Article VALUES (0, 'ledare', 0, NULL, 0, '# Hur man är cool \n det här är **kul**.', '2024-02-23', TRUE);
+INSERT INTO Archive.Article VALUES (1, 'bästa toan att ta koks i på KTH', 0, 'skriven av anonym redaqtör', 1, '## Hur gör man? 
+    Jo. Du bara kör **hårt** mannen.
+    $$x + x = \frac{x}{y}$$', '2024-02-23', TRUE);
+
+INSERT INTO Archive.Issue VALUES (1, 'Skojdbuggen', '2024-04-17', NULL, NULL, NULL, 0);
+INSERT INTO Archive.Article VALUES (2, '(ledare) lol', 1, NULL, 0, 'Typ ta det jävligt lugnt', '2024-04-17', FALSE);
+
+INSERT INTO Archive.AuthoredBy VALUES (0, 'frblo');
+INSERT INTO Archive.AuthoredBy VALUES (0, 'testsupp');
+INSERT INTO Archive.AuthoredBy VALUES (1, 'frblo');
+INSERT INTO Archive.AuthoredBy VALUES (2, 'testsupp');

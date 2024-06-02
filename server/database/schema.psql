@@ -1,0 +1,83 @@
+DROP SCHEMA IF EXISTS Archive CASCADE;
+CREATE SCHEMA Archive;
+
+CREATE TYPE Archive.external_type AS ENUM (
+    'pdf',
+    'html',
+    'image'
+);
+
+CREATE TABLE IF NOT EXISTS Archive.External (
+    id               INT PRIMARY KEY,
+    hosted_url       TEXT NOT NULL,
+    type_of_external Archive.EXTERNAL_TYPE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Archive.Issue (
+    id              INT PRIMARY KEY,
+    title           VARCHAR(255) NOT NULL,
+    publishing_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    pdf             INT
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    html            INT
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    coverpage       INT
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    views           INT,
+        CHECK (views >= 0)
+);
+
+CREATE TABLE IF NOT EXISTS Archive.Article (
+    id          INT PRIMARY KEY,
+    title       VARCHAR(255) NOT NULL,
+    issue       INT
+        REFERENCES Archive.Issue
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    author_text TEXT, -- if you want something else than their names
+    issue_index INT NOT NULL, -- The index of the article in the issue
+    content     TEXT NOT NULL, -- The article in markdown format
+    last_edited DATE NOT NULL,
+    n0lle_safe  BOOLEAN NOT NULL -- If it's safe for nØllan to read
+);
+
+CREATE TABLE IF NOT EXISTS Archive.PictureUsedInArticle (
+    article_id INT
+        REFERENCES Archive.Article
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    picture_id INT
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    PRIMARY KEY(article_id, picture_id)
+);
+
+CREATE TABLE IF NOT EXISTS Archive.Member (
+    kth_id          VARCHAR(255) PRIMARY KEY,
+    title           VARCHAR(255),
+    prefered_name   VARCHAR(255), -- If they would like some other name than their real one
+    picture         INT
+        REFERENCES Archive.External
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    active          BOOLEAN NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Archive.AuthoredBy (
+    article_id  INT
+        REFERENCES Archive.Article
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    kth_id   VARCHAR(255)
+        REFERENCES Archive.Member
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    PRIMARY KEY(article_id, kth_id)
+);
