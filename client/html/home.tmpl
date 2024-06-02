@@ -5,9 +5,10 @@
         <h1>dbuggen</h1>
         {{ range .issues }}
         <a href={{.IssueID}}>
-            <img src={{.Coverimage}}>
+            <!-- <img src={{.Coverpage}}> -->
+            {{.Coverpage}}
             <h3>{{.Title}}</h3>
-            <p>{{.PublishingDate}}</p>
+            <p>Released on {{.PublishingDate}}. {{.Views}} views.</p>
             <br>
         </a>
         <br>

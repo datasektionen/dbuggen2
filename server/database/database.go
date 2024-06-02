@@ -27,6 +27,26 @@ func GetIssues(db *sqlx.DB) []Issue {
 	return issues
 }
 
+// haha.
+func GetHomeIssues(db *sqlx.DB) []HomeIssue {
+	issues := []HomeIssue{}
+
+	err := db.Select(&issues, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
+								FROM (Archive.Issue FULL JOIN (
+									SELECT id AS coverpage, hosted_url
+										FROM Archive.External
+										WHERE type_of_external = 'image'
+									) AS ext
+									USING(coverpage))
+								WHERE id IS NOT NULL
+								ORDER BY publishing_date DESC`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return issues
+}
+
 // GetArticles retrieves a list of article IDs from the database for a given issue.
 func GetArticles(db *sqlx.DB, issue int) []int {
 	var articles []int
@@ -61,8 +81,8 @@ func GetArticle(db *sqlx.DB, issueID int, index int) Article {
 func GetAuthors(db *sqlx.DB, article int) []Author {
 	var authors []Author
 	err := db.Select(&authors, `SELECT kth_id, prefered_name FROM
-							(Archive.Member LEFT JOIN Archive.AuthoredBy USING(kth_id))
-							WHERE article_id=$1`, article)
+								(Archive.Member LEFT JOIN Archive.AuthoredBy USING(kth_id))
+								WHERE article_id=$1`, article)
 	if err != nil {
 		log.Fatal(err)
 	}
