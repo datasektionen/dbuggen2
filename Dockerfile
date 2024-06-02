@@ -6,6 +6,8 @@ COPY *.go ./
 COPY server ./server
 COPY client ./client
 COPY assets ./assets
+COPY config ./config
+COPY .env ./
 
 EXPOSE 8080
 CMD ["go", "run", "main.go"]

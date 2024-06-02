@@ -2,9 +2,9 @@
 
 New dbuggen, even more serious.
 
-## Boring computer nerd stuff
+## Boring nerd stuff
 
-To run this locally, either run via the Dockerfile which *should* set up everything for you, or run it using Go yourself.
+To run this locally, either run via the Dockerfile which *should* set up everything for you, or run it using Go yourself. You will also need a local postgresql server.
 
 First run
 ```shell

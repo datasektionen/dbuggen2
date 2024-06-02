@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	DATABASE_URL string
+	DARKMODE_URL string
 }
 
 func GetConfig() *Config {
@@ -18,6 +19,7 @@ func GetConfig() *Config {
 
 	conf := Config{
 		DATABASE_URL: os.Getenv("DATABASE_URL"),
+		DARKMODE_URL: os.Getenv("DARKMODE_URL"),
 	}
 
 	return &conf

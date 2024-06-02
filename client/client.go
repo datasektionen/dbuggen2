@@ -42,8 +42,11 @@ func Home(issuesRaw []database.Issue) func(c *gin.Context) {
 // Arbitrary article
 func Article(db *sqlx.DB) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		issueID := pathIntSeparator(c.Param("issue"))
-		articleIndex := pathIntSeparator(c.Param("article"))
+		issueID, errI := pathIntSeparator(c.Param("issue"))
+		articleIndex, errA := pathIntSeparator(c.Param("article"))
+		if errI != nil || errA != nil {
+			c.Redirect(http.StatusBadRequest, "")
+		}
 
 		article := database.GetArticle(db, issueID, articleIndex)
 		authors := database.GetAuthors(db, article.ID)
@@ -111,20 +114,20 @@ func authorsName(a database.Author) string {
 
 // Function to remove the "/" before parameters, which was
 // a problem. Turns "/123": string, into 123: int.
-func pathIntSeparator(paramRaw string) int {
+func pathIntSeparator(paramRaw string) (int, error) {
 	_, paramLessRaw, found := strings.Cut(paramRaw, "/")
 
 	if found {
 		param, err := strconv.Atoi(paramLessRaw)
 		if err != nil {
-			log.Fatal(err)
+			return 0, err
 		}
-		return param
+		return param, nil
 	}
 
 	param, err := strconv.Atoi(paramRaw)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	return param
+	return param, nil
 }
