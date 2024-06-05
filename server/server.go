@@ -8,7 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"dbuggen/client"
-	"dbuggen/server/database"
 )
 
 // Start starts the server and initializes the routes and templates.
@@ -20,7 +19,7 @@ func Start(db *sqlx.DB) {
 	r.Static("css", "client/css")
 	r.Static("assets", "assets")
 
-	r.GET("/", client.Home(database.GetHomeIssues(db)))
+	r.GET("/", client.Home(db))
 	r.GET("issue/:issue/:article", client.Article(db))
 
 	r.NoRoute(func(c *gin.Context) {

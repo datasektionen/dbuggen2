@@ -16,19 +16,20 @@ func Start(db_url string) *sqlx.DB {
 	return db
 }
 
-func GetIssues(db *sqlx.DB) []Issue {
+func GetIssues(db *sqlx.DB) ([]Issue, error) {
 	issues := []Issue{}
 
 	err := db.Select(&issues, "SELECT * FROM Archive.Issue ORDER BY publishing_date DESC")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return issues, err
 	}
 
-	return issues
+	return issues, nil
 }
 
 // haha.
-func GetHomeIssues(db *sqlx.DB) []HomeIssue {
+func GetHomeIssues(db *sqlx.DB) ([]HomeIssue, error) {
 	issues := []HomeIssue{}
 
 	err := db.Select(&issues, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
@@ -41,51 +42,56 @@ func GetHomeIssues(db *sqlx.DB) []HomeIssue {
 								WHERE id IS NOT NULL
 								ORDER BY publishing_date DESC`)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return issues, err
 	}
 
-	return issues
+	return issues, nil
 }
 
 // GetArticles retrieves a list of article IDs from the database for a given issue.
-func GetArticles(db *sqlx.DB, issue int) []int {
+func GetArticles(db *sqlx.DB, issue int) ([]int, error) {
 	var articles []int
 	err := db.Get(&articles, `SELECT id FROM Archive.Article WHERE issue=$1 ORDER BY issue_index ASC`, issue)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return articles, err
 	}
 
-	return articles
+	return articles, nil
 }
 
-func GetArticleFromID(db *sqlx.DB, id int) Article {
+func GetArticleFromID(db *sqlx.DB, id int) (Article, error) {
 	var article Article
 	err := db.Get(&article, "SELECT * FROM Archive.Article WHERE id=$1", id)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return article, err
 	}
 
-	return article
+	return article, nil
 }
 
-func GetArticle(db *sqlx.DB, issueID int, index int) Article {
+func GetArticle(db *sqlx.DB, issueID int, index int) (Article, error) {
 	var article Article
 	err := db.Get(&article, "SELECT * FROM Archive.Article WHERE issue=$1 AND issue_index=$2", issueID, index)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return article, err
 	}
 
-	return article
+	return article, nil
 }
 
-func GetAuthors(db *sqlx.DB, article int) []Author {
+func GetAuthors(db *sqlx.DB, article int) ([]Author, error) {
 	var authors []Author
 	err := db.Select(&authors, `SELECT kth_id, prefered_name FROM
 								(Archive.Member LEFT JOIN Archive.AuthoredBy USING(kth_id))
 								WHERE article_id=$1`, article)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return authors, err
 	}
 
-	return authors
+	return authors, nil
 }

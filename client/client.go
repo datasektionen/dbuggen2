@@ -13,26 +13,32 @@ import (
 )
 
 // Home page
-func Home(issuesRaw []database.HomeIssue) func(c *gin.Context) {
-	type DisplayIssue struct {
-		IssueID        string
-		Title          string
-		PublishingDate string
-		Coverpage      template.HTML
-		Views          int
-	}
-
-	var issues []DisplayIssue
-	for _, iss := range issuesRaw {
-		issues = append(issues,
-			DisplayIssue{fmt.Sprintf("issue/%v/0", iss.ID),
-				iss.Title,
-				iss.PublishingDate.Format(time.DateOnly),
-				coverpage(iss.Coverpage),
-				iss.Views})
-	}
-
+func Home(db *sqlx.DB) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		issuesRaw, err := database.GetHomeIssues(db)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "")
+			return
+		}
+
+		type DisplayIssue struct {
+			IssueID        string
+			Title          string
+			PublishingDate string
+			Coverpage      template.HTML
+			Views          int
+		}
+
+		var issues []DisplayIssue
+		for _, iss := range issuesRaw {
+			issues = append(issues,
+				DisplayIssue{
+					fmt.Sprintf("issue/%v/0", iss.ID),
+					iss.Title,
+					iss.PublishingDate.Format(time.DateOnly),
+					coverpage(iss.Coverpage),
+					iss.Views})
+		}
 		c.HTML(http.StatusOK, "home.tmpl", gin.H{
 			"pagetitle": "dbuggen",
 			"issues":    issues,
@@ -47,10 +53,19 @@ func Article(db *sqlx.DB) func(c *gin.Context) {
 		articleIndex, errA := pathIntSeparator(c.Param("article"))
 		if errI != nil || errA != nil {
 			c.Redirect(http.StatusBadRequest, "")
+			return
 		}
 
-		article := database.GetArticle(db, issueID, articleIndex)
-		authors := database.GetAuthors(db, article.ID)
+		article, err := database.GetArticle(db, issueID, articleIndex)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "")
+			return
+		}
+		authors, err := database.GetAuthors(db, article.ID)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "")
+			return
+		}
 
 		c.HTML(http.StatusOK, "article.tmpl", gin.H{
 			"pagetitle":      article.Title,
