@@ -51,7 +51,7 @@ func Home(issuesRaw []database.HomeIssue) func(c *gin.Context) {
 // If the coverpage is not valid, it returns an empty HTML string.
 func coverpage(coverpage sql.NullString) template.HTML {
 	if coverpage.Valid {
-		return template.HTML(fmt.Sprintf(`<img src=%v style="max-width: 40vw;">`, coverpage.String))
+		return template.HTML(fmt.Sprintf(`<img src="%v" style="max-width: 40vw;">`, template.HTMLEscapeString(coverpage.String)))
 	}
 	return template.HTML("")
 }
