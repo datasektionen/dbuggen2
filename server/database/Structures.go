@@ -21,6 +21,15 @@ type Issue struct {
 	Views          int
 }
 
+// Relevant information for issue on home page
+type HomeIssue struct {
+	ID             int
+	Title          string
+	PublishingDate time.Time `db:"publishing_date"`
+	Coverpage      sql.NullString
+	Views          int
+}
+
 type Article struct {
 	ID         int
 	Title      string

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,17 +19,23 @@ import (
 )
 
 // Home page
-func Home(issuesRaw []database.Issue) func(c *gin.Context) {
-	type RelevantIssue struct {
+func Home(issuesRaw []database.HomeIssue) func(c *gin.Context) {
+	type DisplayIssue struct {
 		IssueID        string
 		Title          string
-		PublishingDate time.Time
-		Coverimage     string
+		PublishingDate string
+		Coverpage      template.HTML
+		Views          int
 	}
 
-	var issues []RelevantIssue
+	var issues []DisplayIssue
 	for _, iss := range issuesRaw {
-		issues = append(issues, RelevantIssue{fmt.Sprintf("issue/%v/0", iss.ID), iss.Title, iss.PublishingDate, "https://dbuggen.s3.eu-west-1.amazonaws.com/dbuggen2/marke.png"})
+		issues = append(issues,
+			DisplayIssue{fmt.Sprintf("issue/%v/0", iss.ID),
+				iss.Title,
+				iss.PublishingDate.Format(time.DateOnly),
+				coverpage(iss.Coverpage),
+				iss.Views})
 	}
 
 	return func(c *gin.Context) {
@@ -37,6 +44,16 @@ func Home(issuesRaw []database.Issue) func(c *gin.Context) {
 			"issues":    issues,
 		})
 	}
+}
+
+// coverpage generates an HTML template for the cover image.
+// If the coverpage is valid, it returns an HTML string with an image tag.
+// If the coverpage is not valid, it returns an empty HTML string.
+func coverpage(coverpage sql.NullString) template.HTML {
+	if coverpage.Valid {
+		return template.HTML(fmt.Sprintf(`<img src="%v" style="max-width: 40vw;">`, template.HTMLEscapeString(coverpage.String)))
+	}
+	return template.HTML("")
 }
 
 // Arbitrary article

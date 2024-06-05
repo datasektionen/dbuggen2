@@ -20,7 +20,7 @@ func Start(db *sqlx.DB) {
 	r.Static("css", "client/css")
 	r.Static("assets", "assets")
 
-	r.GET("/", client.Home(database.GetIssues(db)))
+	r.GET("/", client.Home(database.GetHomeIssues(db)))
 	r.GET("issue/:issue/:article", client.Article(db))
 
 	r.NoRoute(func(c *gin.Context) {
