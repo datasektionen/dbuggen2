@@ -9,5 +9,5 @@ import (
 func main() {
 	conf := config.GetConfig()
 	db := database.Start(conf.DATABASE_URL)
-	server.Start(db)
+	server.Start(db, conf)
 }

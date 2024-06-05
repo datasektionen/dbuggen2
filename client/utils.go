@@ -90,6 +90,33 @@ func authorsName(a database.Author) string {
 	return displayName
 }
 
+// darkmode checks if the mörkläggning is active by making request to
+// an external API. It parses and outputs the result as a bool.
+// If any error occurs during the request or parsing the response, it returns
+// the default dark mode status which is true.
+func darkmode(url string) bool {
+	defDarkmode := true
+
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Println(err)
+		return defDarkmode
+	}
+
+	contents, err := io.ReadAll(io.Reader(resp.Body))
+	if err != nil {
+		log.Println(err)
+		return defDarkmode
+	}
+
+	darkmodeStatus, err := strconv.ParseBool(string(contents))
+	if err != nil {
+		log.Println(err)
+		return defDarkmode
+	}
+	return darkmodeStatus
+}
+
 // Function to remove the "/" before parameters, which was
 // a problem. Turns "/123": string, into 123: int.
 func pathIntSeparator(paramRaw string) (int, error) {

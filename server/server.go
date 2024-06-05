@@ -8,10 +8,11 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"dbuggen/client"
+	"dbuggen/config"
 )
 
 // Start starts the server and initializes the routes and templates.
-func Start(db *sqlx.DB) {
+func Start(db *sqlx.DB, conf *config.Config) {
 	r := gin.Default()
 	tmpl := template.Must(template.ParseGlob("client/html/*.tmpl"))
 	r.SetHTMLTemplate(tmpl)
@@ -19,7 +20,7 @@ func Start(db *sqlx.DB) {
 	r.Static("css", "client/css")
 	r.Static("assets", "assets")
 
-	r.GET("/", client.Home(db))
+	r.GET("/", client.Home(db, conf.DARKMODE_URL))
 	r.GET("issue/:issue/:article", client.Article(db))
 
 	r.NoRoute(func(c *gin.Context) {

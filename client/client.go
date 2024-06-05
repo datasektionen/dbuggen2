@@ -13,9 +13,9 @@ import (
 )
 
 // Home page
-func Home(db *sqlx.DB) func(c *gin.Context) {
+func Home(db *sqlx.DB, darkmodeURL string) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		issuesRaw, err := database.GetHomeIssues(db)
+		issuesRaw, err := database.GetHomeIssues(db, darkmode(darkmodeURL))
 		if err != nil {
 			c.Redirect(http.StatusInternalServerError, "")
 			return

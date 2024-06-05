@@ -29,21 +29,45 @@ func GetIssues(db *sqlx.DB) ([]Issue, error) {
 }
 
 // haha.
-func GetHomeIssues(db *sqlx.DB) ([]HomeIssue, error) {
+func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 	issues := []HomeIssue{}
 
-	err := db.Select(&issues, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
-								FROM (Archive.Issue FULL JOIN (
-									SELECT id AS coverpage, hosted_url
-										FROM Archive.External
-										WHERE type_of_external = 'image'
-									) AS ext
-									USING(coverpage))
-								WHERE id IS NOT NULL
-								ORDER BY publishing_date DESC`)
-	if err != nil {
-		log.Println(err)
-		return issues, err
+	if darkmode { // if the mörkläggning is active
+		err := db.Select(&issues, `WITH safe_issues AS (
+										SELECT * FROM Archive.Issue
+											WHERE id IN 
+												(SELECT issue FROM Archive.Article
+													WHERE n0lle_safe = TRUE)
+									)
+									SELECT id, title, publishing_date, hosted_url AS coverpage, views
+										FROM (safe_issues FULL JOIN (
+											SELECT id AS coverpage, hosted_url
+												FROM Archive.External
+												WHERE type_of_external = 'image'
+											) AS ext
+											USING(coverpage))
+										WHERE id IS NOT NULL
+										ORDER BY publishing_date DESC`)
+
+		if err != nil {
+			log.Println(err)
+			return issues, err
+		}
+	} else {
+		err := db.Select(&issues, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
+									FROM (Archive.Issue FULL JOIN (
+										SELECT id AS coverpage, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext
+										USING(coverpage))
+									WHERE id IS NOT NULL
+									ORDER BY publishing_date DESC`)
+
+		if err != nil {
+			log.Println(err)
+			return issues, err
+		}
 	}
 
 	return issues, nil

@@ -3,7 +3,11 @@ package client
 import (
 	"database/sql"
 	"dbuggen/server/database"
+	"net/http"
+	"strconv"
 	"testing"
+
+	"github.com/h2non/gock"
 )
 
 func TestCoverpage(t *testing.T) {
@@ -96,6 +100,51 @@ func TestAuthorsName(t *testing.T) {
 	}
 	expected = "jaghoppasingenpåkthhetersåhär"
 	got = authorsName(author)
+	if got != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+}
+
+func TestDarkmodeFalse(t *testing.T) {
+	defer gock.Off()
+	darkmodeURL := "http://darkmode.datasektionen.se"
+	expected := false
+	gock.New(darkmodeURL).
+		Get("").
+		Reply(http.StatusOK).
+		JSON(strconv.FormatBool(expected))
+
+	got := darkmode(darkmodeURL)
+	if got != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+}
+
+func TestDarkmodeTrue(t *testing.T) {
+	defer gock.Off()
+	darkmodeURL := "http://darkmode.datasektionen.se"
+	expected := true
+	gock.New(darkmodeURL).
+		Get("").
+		Reply(http.StatusOK).
+		JSON(strconv.FormatBool(expected))
+
+	got := darkmode(darkmodeURL)
+	if got != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+}
+
+func TestDarkmodeInvalid(t *testing.T) {
+	defer gock.Off()
+	darkmodeURL := "http://darkmode.datasektionen.se"
+	gock.New(darkmodeURL).
+		Get("").
+		Reply(http.StatusOK).
+		JSON("hehe, not a bool n00b")
+
+	expected := true
+	got := darkmode(darkmodeURL)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
 	}
