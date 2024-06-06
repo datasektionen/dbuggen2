@@ -3,6 +3,7 @@ package server
 import (
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -20,7 +21,8 @@ func Start(db *sqlx.DB, conf *config.Config) {
 	r.Static("css", "client/css")
 	r.Static("assets", "assets")
 
-	r.GET("/", client.Home(db, conf.DARKMODE_URL))
+	ds := initDarkmode(conf.DARKMODE_URL)
+	r.GET("/", client.Home(db, &ds, conf.DARKMODE_URL))
 	r.GET("issue/:issue/:article", client.Article(db))
 
 	r.NoRoute(func(c *gin.Context) {
@@ -28,4 +30,14 @@ func Start(db *sqlx.DB, conf *config.Config) {
 	})
 
 	r.Run()
+}
+
+func initDarkmode(url string) client.DarkmodeStatus {
+	ds := client.DarkmodeStatus{
+		Darkmode: true,
+		LastPoll: time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local),
+	}
+
+	client.Darkmode(&ds, url)
+	return ds
 }

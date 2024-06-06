@@ -9,13 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 
+	// "dbuggen/server"
 	"dbuggen/server/database"
+	// "dbuggen/server/database"
+	// "dbuggen/server/database"
 )
 
 // Home page
-func Home(db *sqlx.DB, darkmodeURL string) func(c *gin.Context) {
+func Home(db *sqlx.DB, ds *DarkmodeStatus, darkmodeURL string) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		issuesRaw, err := database.GetHomeIssues(db, darkmode(darkmodeURL))
+		issuesRaw, err := database.GetHomeIssues(db, Darkmode(ds, darkmodeURL))
 		if err != nil {
 			c.Redirect(http.StatusInternalServerError, "")
 			return

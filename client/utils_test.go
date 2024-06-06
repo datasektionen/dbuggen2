@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/h2non/gock"
 )
@@ -114,9 +115,27 @@ func TestDarkmodeFalse(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(strconv.FormatBool(expected))
 
-	got := darkmode(darkmodeURL)
+	oldpoll := time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local)
+	ds := DarkmodeStatus{
+		Darkmode: true,
+		LastPoll: oldpoll,
+	}
+
+	got := Darkmode(&ds, darkmodeURL)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
+	}
+	newpoll := ds.LastPoll
+	if newpoll == oldpoll {
+		t.Errorf("The polling date of the struct has not been updated")
+	}
+
+	got2 := Darkmode(&ds, darkmodeURL)
+	if got2 != expected {
+		t.Errorf("got %v, wanted %v", got2, expected)
+	}
+	if ds.LastPoll != newpoll {
+		t.Errorf("The darkmode status was polled again when it should not have been")
 	}
 }
 
@@ -129,9 +148,27 @@ func TestDarkmodeTrue(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(strconv.FormatBool(expected))
 
-	got := darkmode(darkmodeURL)
+	oldpoll := time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local)
+	ds := DarkmodeStatus{
+		Darkmode: false,
+		LastPoll: oldpoll,
+	}
+
+	got := Darkmode(&ds, darkmodeURL)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
+	}
+	newpoll := ds.LastPoll
+	if newpoll == oldpoll {
+		t.Errorf("The polling date of the struct has not been updated")
+	}
+
+	got2 := Darkmode(&ds, darkmodeURL)
+	if got2 != expected {
+		t.Errorf("got %v, wanted %v", got2, expected)
+	}
+	if ds.LastPoll != newpoll {
+		t.Errorf("The darkmode status was polled again when it should not have been")
 	}
 }
 
@@ -143,10 +180,19 @@ func TestDarkmodeInvalid(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON("hehe, not a bool n00b")
 
+	oldpoll := time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local)
+	ds := DarkmodeStatus{
+		Darkmode: false,
+		LastPoll: oldpoll,
+	}
+
 	expected := true
-	got := darkmode(darkmodeURL)
+	got := Darkmode(&ds, darkmodeURL)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
+	}
+	if ds.LastPoll != oldpoll {
+		t.Errorf("The darkmode status has been updated with an invalid url")
 	}
 }
 

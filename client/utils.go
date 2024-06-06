@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // coverpage generates an HTML template for the cover image.
@@ -90,11 +91,20 @@ func authorsName(a database.Author) string {
 	return displayName
 }
 
+type DarkmodeStatus struct {
+	Darkmode bool
+	LastPoll time.Time
+}
+
 // darkmode checks if the mörkläggning is active by making request to
 // an external API. It parses and outputs the result as a bool.
 // If any error occurs during the request or parsing the response, it returns
 // the default dark mode status which is true.
-func darkmode(url string) bool {
+func Darkmode(ds *DarkmodeStatus, url string) bool {
+	if time.Now().Sub(ds.LastPoll) <= time.Hour*24 {
+		return ds.Darkmode
+	}
+
 	defDarkmode := true
 
 	resp, err := http.Get(url)
@@ -114,6 +124,9 @@ func darkmode(url string) bool {
 		log.Println(err)
 		return defDarkmode
 	}
+
+	ds.LastPoll = time.Now()
+	ds.Darkmode = darkmodeStatus
 	return darkmodeStatus
 }
 
