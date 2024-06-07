@@ -119,9 +119,10 @@ func TestDarkmodeFalse(t *testing.T) {
 	ds := DarkmodeStatus{
 		Darkmode: true,
 		LastPoll: oldpoll,
+		Url:      darkmodeURL,
 	}
 
-	got := Darkmode(&ds, darkmodeURL)
+	got := Darkmode(&ds)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
 	}
@@ -130,7 +131,7 @@ func TestDarkmodeFalse(t *testing.T) {
 		t.Errorf("The polling date of the struct has not been updated")
 	}
 
-	got2 := Darkmode(&ds, darkmodeURL)
+	got2 := Darkmode(&ds)
 	if got2 != expected {
 		t.Errorf("got %v, wanted %v", got2, expected)
 	}
@@ -152,9 +153,10 @@ func TestDarkmodeTrue(t *testing.T) {
 	ds := DarkmodeStatus{
 		Darkmode: false,
 		LastPoll: oldpoll,
+		Url:      darkmodeURL,
 	}
 
-	got := Darkmode(&ds, darkmodeURL)
+	got := Darkmode(&ds)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
 	}
@@ -163,7 +165,7 @@ func TestDarkmodeTrue(t *testing.T) {
 		t.Errorf("The polling date of the struct has not been updated")
 	}
 
-	got2 := Darkmode(&ds, darkmodeURL)
+	got2 := Darkmode(&ds)
 	if got2 != expected {
 		t.Errorf("got %v, wanted %v", got2, expected)
 	}
@@ -184,10 +186,11 @@ func TestDarkmodeInvalid(t *testing.T) {
 	ds := DarkmodeStatus{
 		Darkmode: false,
 		LastPoll: oldpoll,
+		Url:      darkmodeURL,
 	}
 
 	expected := true
-	got := Darkmode(&ds, darkmodeURL)
+	got := Darkmode(&ds)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
 	}

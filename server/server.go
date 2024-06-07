@@ -22,7 +22,7 @@ func Start(db *sqlx.DB, conf *config.Config) {
 	r.Static("assets", "assets")
 
 	ds := initDarkmode(conf.DARKMODE_URL)
-	r.GET("/", client.Home(db, &ds, conf.DARKMODE_URL))
+	r.GET("/", client.Home(db, &ds))
 	r.GET("issue/:issue/:article", client.Article(db))
 
 	r.NoRoute(func(c *gin.Context) {
@@ -36,8 +36,9 @@ func initDarkmode(url string) client.DarkmodeStatus {
 	ds := client.DarkmodeStatus{
 		Darkmode: true,
 		LastPoll: time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local),
+		Url:      url,
 	}
 
-	client.Darkmode(&ds, url)
+	client.Darkmode(&ds)
 	return ds
 }

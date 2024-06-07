@@ -94,20 +94,21 @@ func authorsName(a database.Author) string {
 type DarkmodeStatus struct {
 	Darkmode bool
 	LastPoll time.Time
+	Url      string
 }
 
 // darkmode checks if the mörkläggning is active by making request to
 // an external API. It parses and outputs the result as a bool.
 // If any error occurs during the request or parsing the response, it returns
 // the default dark mode status which is true.
-func Darkmode(ds *DarkmodeStatus, url string) bool {
+func Darkmode(ds *DarkmodeStatus) bool {
 	if time.Now().Sub(ds.LastPoll) <= time.Hour*24 {
 		return ds.Darkmode
 	}
 
 	defDarkmode := true
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(ds.Url)
 	if err != nil {
 		log.Println(err)
 		return defDarkmode
