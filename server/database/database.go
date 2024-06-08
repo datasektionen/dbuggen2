@@ -35,7 +35,7 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 	if darkmode { // if the mörkläggning is active
 		err := db.Select(&issues, `WITH safe_issues AS (
 										SELECT * FROM Archive.Issue
-											WHERE id IN 
+											WHERE id IN
 												(SELECT issue FROM Archive.Article
 													WHERE n0lle_safe = TRUE)
 									)
@@ -85,23 +85,26 @@ func GetArticles(db *sqlx.DB, issue int) ([]int, error) {
 	return articles, nil
 }
 
-func GetArticleFromID(db *sqlx.DB, id int) (Article, error) {
+func GetArticle(db *sqlx.DB, issueID int, index int, darkmode bool) (Article, error) {
 	var article Article
-	err := db.Get(&article, "SELECT * FROM Archive.Article WHERE id=$1", id)
-	if err != nil {
-		log.Println(err)
-		return article, err
-	}
 
-	return article, nil
-}
-
-func GetArticle(db *sqlx.DB, issueID int, index int) (Article, error) {
-	var article Article
-	err := db.Get(&article, "SELECT * FROM Archive.Article WHERE issue=$1 AND issue_index=$2", issueID, index)
-	if err != nil {
-		log.Println(err)
-		return article, err
+	if darkmode {
+		if err := db.Get(&article, `SELECT * FROM Archive.Article
+										WHERE issue=$1
+											AND issue_index=$2
+											AND issue IN (
+												SELECT id FROM Archive.Issue
+													WHERE id IN (
+														SELECT issue FROM Archive.Article
+															WHERE n0lle_safe = TRUE))`, issueID, index); err != nil {
+			log.Println(err)
+			return article, err
+		}
+	} else {
+		if err := db.Get(&article, "SELECT * FROM Archive.Article WHERE issue=$1 AND issue_index=$2", issueID, index); err != nil {
+			log.Println(err)
+			return article, err
+		}
 	}
 
 	return article, nil

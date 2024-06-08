@@ -102,7 +102,7 @@ type DarkmodeStatus struct {
 // If any error occurs during the request or parsing the response, it returns
 // the default dark mode status which is true.
 func Darkmode(ds *DarkmodeStatus) bool {
-	if time.Now().Sub(ds.LastPoll) <= time.Hour*24 {
+	if time.Since(ds.LastPoll) <= time.Hour*24 {
 		return ds.Darkmode
 	}
 
@@ -120,7 +120,7 @@ func Darkmode(ds *DarkmodeStatus) bool {
 		return defDarkmode
 	}
 
-	darkmodeStatus, err := strconv.ParseBool(string(contents))
+	darkmodeStatus, err := strconv.ParseBool(strings.TrimSpace(string(contents)))
 	if err != nil {
 		log.Println(err)
 		return defDarkmode

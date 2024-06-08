@@ -23,7 +23,7 @@ func Start(db *sqlx.DB, conf *config.Config) {
 
 	ds := initDarkmode(conf.DARKMODE_URL)
 	r.GET("/", client.Home(db, &ds))
-	r.GET("issue/:issue/:article", client.Article(db))
+	r.GET("issue/:issue/:article", client.Article(db, &ds))
 
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
