@@ -39,7 +39,7 @@ func Home(db *sqlx.DB) func(c *gin.Context) {
 					coverpage(iss.Coverpage),
 					iss.Views})
 		}
-		c.HTML(http.StatusOK, "home.tmpl", gin.H{
+		c.HTML(http.StatusOK, "home.html", gin.H{
 			"pagetitle": "dbuggen",
 			"issues":    issues,
 		})
@@ -67,7 +67,7 @@ func Article(db *sqlx.DB) func(c *gin.Context) {
 			return
 		}
 
-		c.HTML(http.StatusOK, "article.tmpl", gin.H{
+		c.HTML(http.StatusOK, "article.html", gin.H{
 			"pagetitle":      article.Title,
 			"title":          article.Title,
 			"authors":        authortext(article.AuthorText, authors),

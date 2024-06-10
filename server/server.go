@@ -13,7 +13,7 @@ import (
 // Start starts the server and initializes the routes and templates.
 func Start(db *sqlx.DB) {
 	r := gin.Default()
-	tmpl := template.Must(template.ParseGlob("client/html/*.tmpl"))
+	tmpl := template.Must(template.ParseGlob("client/html/*.html"))
 	r.SetHTMLTemplate(tmpl)
 
 	r.Static("css", "client/css")
