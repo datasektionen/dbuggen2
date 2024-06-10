@@ -29,21 +29,45 @@ func GetIssues(db *sqlx.DB) ([]Issue, error) {
 }
 
 // haha.
-func GetHomeIssues(db *sqlx.DB) ([]HomeIssue, error) {
+func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 	issues := []HomeIssue{}
 
-	err := db.Select(&issues, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
-								FROM (Archive.Issue FULL JOIN (
-									SELECT id AS coverpage, hosted_url
-										FROM Archive.External
-										WHERE type_of_external = 'image'
-									) AS ext
-									USING(coverpage))
-								WHERE id IS NOT NULL
-								ORDER BY publishing_date DESC`)
-	if err != nil {
-		log.Println(err)
-		return issues, err
+	if darkmode { // if the mörkläggning is active
+		err := db.Select(&issues, `WITH safe_issues AS (
+										SELECT * FROM Archive.Issue
+											WHERE id IN
+												(SELECT issue FROM Archive.Article
+													WHERE n0lle_safe = TRUE)
+									)
+									SELECT id, title, publishing_date, hosted_url AS coverpage, views
+										FROM (safe_issues FULL JOIN (
+											SELECT id AS coverpage, hosted_url
+												FROM Archive.External
+												WHERE type_of_external = 'image'
+											) AS ext
+											USING(coverpage))
+										WHERE id IS NOT NULL
+										ORDER BY publishing_date DESC`)
+
+		if err != nil {
+			log.Println(err)
+			return issues, err
+		}
+	} else {
+		err := db.Select(&issues, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
+									FROM (Archive.Issue FULL JOIN (
+										SELECT id AS coverpage, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext
+										USING(coverpage))
+									WHERE id IS NOT NULL
+									ORDER BY publishing_date DESC`)
+
+		if err != nil {
+			log.Println(err)
+			return issues, err
+		}
 	}
 
 	return issues, nil
@@ -61,23 +85,26 @@ func GetArticles(db *sqlx.DB, issue int) ([]int, error) {
 	return articles, nil
 }
 
-func GetArticleFromID(db *sqlx.DB, id int) (Article, error) {
+func GetArticle(db *sqlx.DB, issueID int, index int, darkmode bool) (Article, error) {
 	var article Article
-	err := db.Get(&article, "SELECT * FROM Archive.Article WHERE id=$1", id)
-	if err != nil {
-		log.Println(err)
-		return article, err
-	}
 
-	return article, nil
-}
-
-func GetArticle(db *sqlx.DB, issueID int, index int) (Article, error) {
-	var article Article
-	err := db.Get(&article, "SELECT * FROM Archive.Article WHERE issue=$1 AND issue_index=$2", issueID, index)
-	if err != nil {
-		log.Println(err)
-		return article, err
+	if darkmode {
+		if err := db.Get(&article, `SELECT * FROM Archive.Article
+										WHERE issue=$1
+											AND issue_index=$2
+											AND issue IN (
+												SELECT id FROM Archive.Issue
+													WHERE id IN (
+														SELECT issue FROM Archive.Article
+															WHERE n0lle_safe = TRUE))`, issueID, index); err != nil {
+			log.Println(err)
+			return article, err
+		}
+	} else {
+		if err := db.Get(&article, "SELECT * FROM Archive.Article WHERE issue=$1 AND issue_index=$2", issueID, index); err != nil {
+			log.Println(err)
+			return article, err
+		}
 	}
 
 	return article, nil

@@ -3,7 +3,13 @@ package client
 import (
 	"database/sql"
 	"dbuggen/server/database"
+	"net/http"
+	"strconv"
+	"sync"
 	"testing"
+	"time"
+
+	"github.com/h2non/gock"
 )
 
 func TestCoverpage(t *testing.T) {
@@ -98,6 +104,102 @@ func TestAuthorsName(t *testing.T) {
 	got = authorsName(author)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
+	}
+}
+
+func TestDarkmodeFalse(t *testing.T) {
+	defer gock.Off()
+	darkmodeURL := "http://darkmode.datasektionen.se"
+	expected := false
+	gock.New(darkmodeURL).
+		Get("").
+		Reply(http.StatusOK).
+		JSON(strconv.FormatBool(expected))
+
+	oldpoll := time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local)
+	ds := DarkmodeStatus{
+		Darkmode: true,
+		LastPoll: oldpoll,
+		Url:      darkmodeURL,
+		Mutex:    sync.RWMutex{},
+	}
+
+	got := Darkmode(&ds)
+	if got != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+	newpoll := ds.LastPoll
+	if newpoll == oldpoll {
+		t.Errorf("The polling date of the struct has not been updated")
+	}
+
+	got2 := Darkmode(&ds)
+	if got2 != expected {
+		t.Errorf("got %v, wanted %v", got2, expected)
+	}
+	if ds.LastPoll != newpoll {
+		t.Errorf("The darkmode status was polled again when it should not have been")
+	}
+}
+
+func TestDarkmodeTrue(t *testing.T) {
+	defer gock.Off()
+	darkmodeURL := "http://darkmode.datasektionen.se"
+	expected := true
+	gock.New(darkmodeURL).
+		Get("").
+		Reply(http.StatusOK).
+		JSON(strconv.FormatBool(expected))
+
+	oldpoll := time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local)
+	ds := DarkmodeStatus{
+		Darkmode: false,
+		LastPoll: oldpoll,
+		Url:      darkmodeURL,
+		Mutex:    sync.RWMutex{},
+	}
+
+	got := Darkmode(&ds)
+	if got != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+	newpoll := ds.LastPoll
+	if newpoll == oldpoll {
+		t.Errorf("The polling date of the struct has not been updated")
+	}
+
+	got2 := Darkmode(&ds)
+	if got2 != expected {
+		t.Errorf("got %v, wanted %v", got2, expected)
+	}
+	if ds.LastPoll != newpoll {
+		t.Errorf("The darkmode status was polled again when it should not have been")
+	}
+}
+
+func TestDarkmodeInvalid(t *testing.T) {
+	defer gock.Off()
+	darkmodeURL := "http://darkmode.datasektionen.se"
+	gock.New(darkmodeURL).
+		Get("").
+		Reply(http.StatusOK).
+		JSON("hehe, not a bool n00b")
+
+	oldpoll := time.Date(1983, time.October, 7, 17, 0, 0, 0, time.Local)
+	ds := DarkmodeStatus{
+		Darkmode: false,
+		LastPoll: oldpoll,
+		Url:      darkmodeURL,
+		Mutex:    sync.RWMutex{},
+	}
+
+	expected := true
+	got := Darkmode(&ds)
+	if got != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+	if ds.LastPoll != oldpoll {
+		t.Errorf("The darkmode status has been updated with an invalid url")
 	}
 }
 

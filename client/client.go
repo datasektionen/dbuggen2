@@ -13,9 +13,9 @@ import (
 )
 
 // Home page
-func Home(db *sqlx.DB) func(c *gin.Context) {
+func Home(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		issuesRaw, err := database.GetHomeIssues(db)
+		issuesRaw, err := database.GetHomeIssues(db, Darkmode(ds))
 		if err != nil {
 			c.Redirect(http.StatusInternalServerError, "")
 			return
@@ -47,7 +47,7 @@ func Home(db *sqlx.DB) func(c *gin.Context) {
 }
 
 // Arbitrary article
-func Article(db *sqlx.DB) func(c *gin.Context) {
+func Article(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		issueID, errI := pathIntSeparator(c.Param("issue"))
 		articleIndex, errA := pathIntSeparator(c.Param("article"))
@@ -56,7 +56,7 @@ func Article(db *sqlx.DB) func(c *gin.Context) {
 			return
 		}
 
-		article, err := database.GetArticle(db, issueID, articleIndex)
+		article, err := database.GetArticle(db, issueID, articleIndex, Darkmode(ds))
 		if err != nil {
 			c.Redirect(http.StatusInternalServerError, "")
 			return

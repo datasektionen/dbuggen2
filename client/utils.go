@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 // coverpage generates an HTML template for the cover image.
@@ -88,6 +90,52 @@ func authorsName(a database.Author) string {
 		return a.KthID
 	}
 	return displayName
+}
+
+type DarkmodeStatus struct {
+	Darkmode bool
+	LastPoll time.Time
+	Url      string
+	Mutex    sync.RWMutex
+}
+
+// darkmode checks if the mörkläggning is active by making request to
+// an external API. It parses and outputs the result as a bool.
+// If any error occurs during the request or parsing the response, it returns
+// the default dark mode status which is true.
+func Darkmode(ds *DarkmodeStatus) bool {
+	ds.Mutex.RLock()
+	if time.Since(ds.LastPoll) <= time.Hour*24 {
+		ds.Mutex.RUnlock()
+		return ds.Darkmode
+	}
+
+	ds.Mutex.RUnlock()
+	ds.Mutex.Lock()
+	defer ds.Mutex.Unlock()
+	defDarkmode := true
+
+	resp, err := http.Get(ds.Url)
+	if err != nil {
+		log.Println(err)
+		return defDarkmode
+	}
+
+	contents, err := io.ReadAll(io.Reader(resp.Body))
+	if err != nil {
+		log.Println(err)
+		return defDarkmode
+	}
+
+	darkmodeStatus, err := strconv.ParseBool(strings.TrimSpace(string(contents)))
+	if err != nil {
+		log.Println(err)
+		return defDarkmode
+	}
+
+	ds.LastPoll = time.Now()
+	ds.Darkmode = darkmodeStatus
+	return darkmodeStatus
 }
 
 // Function to remove the "/" before parameters, which was
