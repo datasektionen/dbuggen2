@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -95,6 +96,7 @@ type DarkmodeStatus struct {
 	Darkmode bool
 	LastPoll time.Time
 	Url      string
+	Mutex    sync.RWMutex
 }
 
 // darkmode checks if the mörkläggning is active by making request to
@@ -102,10 +104,15 @@ type DarkmodeStatus struct {
 // If any error occurs during the request or parsing the response, it returns
 // the default dark mode status which is true.
 func Darkmode(ds *DarkmodeStatus) bool {
+	ds.Mutex.RLock()
 	if time.Since(ds.LastPoll) <= time.Hour*24 {
+		ds.Mutex.RUnlock()
 		return ds.Darkmode
 	}
 
+	ds.Mutex.RUnlock()
+	ds.Mutex.Lock()
+	defer ds.Mutex.Unlock()
 	defDarkmode := true
 
 	resp, err := http.Get(ds.Url)

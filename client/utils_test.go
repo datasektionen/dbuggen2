@@ -5,6 +5,7 @@ import (
 	"dbuggen/server/database"
 	"net/http"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -120,6 +121,7 @@ func TestDarkmodeFalse(t *testing.T) {
 		Darkmode: true,
 		LastPoll: oldpoll,
 		Url:      darkmodeURL,
+		Mutex:    sync.RWMutex{},
 	}
 
 	got := Darkmode(&ds)
@@ -154,6 +156,7 @@ func TestDarkmodeTrue(t *testing.T) {
 		Darkmode: false,
 		LastPoll: oldpoll,
 		Url:      darkmodeURL,
+		Mutex:    sync.RWMutex{},
 	}
 
 	got := Darkmode(&ds)
@@ -187,6 +190,7 @@ func TestDarkmodeInvalid(t *testing.T) {
 		Darkmode: false,
 		LastPoll: oldpoll,
 		Url:      darkmodeURL,
+		Mutex:    sync.RWMutex{},
 	}
 
 	expected := true
