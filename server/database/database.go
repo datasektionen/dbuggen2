@@ -46,7 +46,8 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 												WHERE type_of_external = 'image'
 											) AS ext
 											USING(coverpage))
-										WHERE id IS NOT NULL
+										WHERE id IS NOT NULL AND
+											publishing_date IS NOT NULL
 										ORDER BY publishing_date DESC`)
 
 		if err != nil {
@@ -61,7 +62,8 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 											WHERE type_of_external = 'image'
 										) AS ext
 										USING(coverpage))
-									WHERE id IS NOT NULL
+									WHERE id IS NOT NULL AND
+										publishing_date IS NOT NULL
 									ORDER BY publishing_date DESC`)
 
 		if err != nil {

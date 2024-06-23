@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS Archive.External (
 CREATE TABLE IF NOT EXISTS Archive.Issue (
     id              INT PRIMARY KEY,
     title           VARCHAR(255) NOT NULL,
-    publishing_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    publishing_date DATE, -- null if it has not been published yet
     pdf             INT
         REFERENCES Archive.External
         ON UPDATE CASCADE
