@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<body>
+    {{template "index" .}}
+    <main>
+        {{.coverpage}}
+        <h1>{{.issueTitle}}</h1>
+        <div class="articleContent">
+            {{range .articles}}
+            <hr>
+            
+            <a href={{.ArticleLink}}>
+                <h2>{{.Title}}</h2>
+            </a>
+            <h3>{{.Authors}}</h3>
+            {{.Content}}
+
+            <p>Last edited on {{.LastEdited}}</p>
+            {{end}}
+        </div>
+    </main>
+</body>

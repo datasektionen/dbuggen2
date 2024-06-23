@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -26,6 +27,47 @@ func GetIssues(db *sqlx.DB) ([]Issue, error) {
 	}
 
 	return issues, nil
+}
+
+func GetIssue(db *sqlx.DB, issueID int, darkmode bool) (HomeIssue, error) {
+	var issue HomeIssue
+
+	if darkmode {
+		err := db.Get(&issue, `WITH safe_issues AS (
+									SELECT * FROM Archive.Issue
+										WHERE id IN
+											(SELECT issue FROM Archive.Article
+												WHERE n0lle_safe = TRUE)
+								)
+								SELECT id, title, publishing_date, hosted_url AS coverpage, views
+									FROM (safe_issues FULL JOIN (
+										SELECT id AS coverpage, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext
+										USING(coverpage))
+									WHERE id=$1`, issueID)
+		if err != nil {
+			log.Println(err)
+			return issue, err
+		}
+	} else {
+		err := db.Get(&issue, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
+									FROM (Archive.Issue FULL JOIN (
+										SELECT id AS coverpage, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext
+										USING(coverpage))
+									WHERE id=$1`, issueID)
+
+		if err != nil {
+			log.Println(err)
+			return issue, err
+		}
+	}
+
+	return issue, nil
 }
 
 // haha.
@@ -74,12 +116,20 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 }
 
 // GetArticles retrieves a list of article IDs from the database for a given issue.
-func GetArticles(db *sqlx.DB, issue int) ([]int, error) {
-	var articles []int
-	err := db.Get(&articles, `SELECT id FROM Archive.Article WHERE issue=$1 ORDER BY issue_index ASC`, issue)
-	if err != nil {
+func GetArticles(db *sqlx.DB, issue int, darkmode bool) ([]Article, error) {
+	var articles []Article
+
+	if err := db.Select(&articles, `SELECT * FROM Archive.Article WHERE issue=$1`, issue); err != nil {
 		log.Println(err)
 		return articles, err
+	}
+
+	if darkmode {
+		for _, article := range articles {
+			if !article.N0lleSafe {
+				return articles, errors.New("not safe")
+			}
+		}
 	}
 
 	return articles, nil

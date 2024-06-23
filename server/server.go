@@ -26,6 +26,7 @@ func Start(db *sqlx.DB, conf *config.Config) {
 	initDarkmode(&ds, conf.DARKMODE_URL)
 
 	r.GET("/", client.Home(db, &ds))
+	r.GET("issue/:issue", client.Issue(db, &ds))
 	r.GET("issue/:issue/:article", client.Article(db, &ds))
 
 	r.NoRoute(func(c *gin.Context) {
