@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -36,6 +37,106 @@ func memberpicture(picture sql.NullString) template.HTML {
 		pic = "/assets/default_member.svg"
 	}
 	return template.HTML(fmt.Sprintf(`<img src="%v" style="max-width: 10vw;">`, template.HTMLEscapeString(pic)))
+}
+
+// a struct for displaying members on the
+// redaqtion page.
+type displayMember struct {
+	KthID   string
+	Name    string
+	Picture template.HTML
+	Title   string
+}
+
+// creates a displaymember from a member struct, using the prefered
+// name if there is any and a html template for the picture used.
+func displaymemberize(members []database.Member) []displayMember {
+	var displaymembers []displayMember
+	for _, member := range members {
+		name := authorsName(database.Author{KthID: member.KthID, PreferedName: member.PreferedName})
+		picture := memberpicture(member.PictureURL)
+		displaymembers = append(displaymembers, displayMember{
+			KthID:   fmt.Sprintf("redaqtionen/%v", member.KthID),
+			Name:    name,
+			Picture: picture,
+			Title:   member.Title,
+		})
+	}
+	return displaymembers
+}
+
+// Gets a list of current chefreds kth ids from dfunkt
+func getChefreds(DFUNKT_URL string) []string {
+	type user struct { // disgusting, horrid - eeewwww
+		Kthid string `json:"kthid"`
+	}
+	type mandate struct { // "go"... more like "no".
+		User user `json:"user"`
+	}
+	type result struct { // "json"... more like "no, son"
+		Mandates []mandate `json:"mandates"`
+	}
+
+	if DFUNKT_URL[len(DFUNKT_URL)-1] != '/' { // no https://dfunkt.seapi/role/...
+		DFUNKT_URL = fmt.Sprintf("%v/", DFUNKT_URL)
+	}
+
+	var chefreds []string
+
+	resp, err := http.Get(fmt.Sprintf("%vapi/role/chefred/current", DFUNKT_URL))
+	if err != nil {
+		log.Println(err)
+		return chefreds
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("unexpected http response from dfunkt: %v", resp.StatusCode)
+	}
+
+	contents, err := io.ReadAll(io.Reader(resp.Body))
+	if err != nil {
+		log.Println(err)
+		return chefreds
+	}
+
+	var res result
+	err = json.Unmarshal([]byte(contents), &res)
+	if err != nil {
+		log.Println(err)
+		return chefreds
+	}
+
+	for _, id := range res.Mandates {
+		chefreds = append(chefreds, id.User.Kthid)
+	}
+
+	return chefreds
+}
+
+// Using a list of the kth ids of however many chefreds there are, it removes them
+// the list of active members in case they are also present there as to not
+// display duplicates. In case the chefred is not an active member it will
+// create a default profile for them.
+func removeDuplicateChefreds(chefredIDs []string, members []database.Member) ([]database.Member, []database.Member) {
+	chefreds := make([]database.Member, len(chefredIDs))
+	for i, chef := range chefredIDs {
+		j := slices.IndexFunc(members, func(member database.Member) bool { return member.KthID == chef })
+		if j == -1 {
+			chefreds[i] = database.Member{
+				KthID:        chef,
+				PreferedName: sql.NullString{Valid: false, String: ""},
+				PictureURL:   sql.NullString{Valid: false, String: ""},
+				Title:        "chefred",
+				Active:       true,
+			}
+			continue
+		}
+
+		chefreds[i] = members[j]
+		members = slices.Delete(members, j, j+1)
+	}
+	return chefreds, members
 }
 
 // authortext returns the author text based on the given AuthorText and authors.
@@ -91,8 +192,8 @@ func authorsName(a database.Author) string {
 		return a.KthID
 	}
 	m := make(map[string]interface{})
-	errg := json.Unmarshal(contents, &m)
-	if errg != nil {
+	err = json.Unmarshal(contents, &m)
+	if err != nil {
 		log.Println(err)
 		return a.KthID
 	}

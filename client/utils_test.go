@@ -48,6 +48,10 @@ func TestMemberpicture(t *testing.T) {
 	}
 }
 
+func TestGetChefreds(t *testing.T) {
+	getChefreds("https://dfunkt.datasektionen.se/")
+}
+
 func TestAuthortext(t *testing.T) {
 	// Test case 1: Valid AuthorText
 	authorText := sql.NullString{String: "Skriven av Test Testström", Valid: true}

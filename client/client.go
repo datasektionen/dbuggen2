@@ -77,7 +77,7 @@ func Article(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 }
 
 // Page for all of (active) redaqtionen to be shown to the world
-func Redaqtionen(db *sqlx.DB) func(c *gin.Context) {
+func Redaqtionen(db *sqlx.DB, DFUNKT_URL string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		members, err := database.GetActiveMembers(db)
 		if err != nil {
@@ -85,27 +85,14 @@ func Redaqtionen(db *sqlx.DB) func(c *gin.Context) {
 			return
 		}
 
-		type DisplayMember struct {
-			KthID   string
-			Name    string
-			Picture template.HTML
-			Title   string
-		}
-
-		var displaymembers []DisplayMember
-		for _, member := range members {
-			name := authorsName(database.Author{KthID: member.KthID, PreferedName: member.PreferedName})
-			picture := memberpicture(member.PictureURL)
-			displaymembers = append(displaymembers, DisplayMember{
-				KthID:   fmt.Sprintf("redaqtionen/%v", member.KthID),
-				Name:    name,
-				Picture: picture,
-				Title:   member.Title,
-			})
-		}
+		chefredIDs := getChefreds(DFUNKT_URL)
+		chefreds, members := removeDuplicateChefreds(chefredIDs, members)
+		displaymembers := displaymemberize(members)
+		displayChefreds := displaymemberize(chefreds)
 
 		c.HTML(http.StatusOK, "redaqtionen.html", gin.H{
-			"members": displaymembers,
+			"chefreds": displayChefreds,
+			"members":  displaymembers,
 		})
 	}
 }
