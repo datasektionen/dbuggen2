@@ -30,6 +30,24 @@ func TestCoverpage(t *testing.T) {
 	}
 }
 
+func TestMemberpicture(t *testing.T) {
+	// Test case 1: Valid coverpage
+	mp := sql.NullString{String: "https://example.com/cover.jpg", Valid: true}
+	expected := `<img src="https://example.com/cover.jpg" style="max-width: 10vw;">`
+	got := memberpicture(mp)
+	if string(got) != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+
+	// Test case 2: Invalid coverpage
+	mp = sql.NullString{String: "", Valid: false}
+	expected = `<img src="/assets/default_member.svg" style="max-width: 10vw;">`
+	got = memberpicture(mp)
+	if string(got) != expected {
+		t.Errorf("got %v, wanted %v", got, expected)
+	}
+}
+
 func TestAuthortext(t *testing.T) {
 	// Test case 1: Valid AuthorText
 	authorText := sql.NullString{String: "Skriven av Test Testström", Valid: true}
