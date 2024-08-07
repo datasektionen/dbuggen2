@@ -25,6 +25,19 @@ func coverpage(coverpage sql.NullString) template.HTML {
 	return template.HTML("")
 }
 
+// Generates an html template for a member picture. If the member has
+// an image that will be displayed, and otherwise it will show a
+// default picture.
+func memberpicture(picture sql.NullString) template.HTML {
+	var pic string
+	if picture.Valid {
+		pic = picture.String
+	} else {
+		pic = "/assets/default_member.svg"
+	}
+	return template.HTML(fmt.Sprintf(`<img src="%v" style="max-width: 10vw;">`, template.HTMLEscapeString(pic)))
+}
+
 // authortext returns the author text based on the given AuthorText and authors.
 // If AuthorText is valid, it returns the AuthorText string. Otherwise, it constructs
 // the author text using the names of the authors.

@@ -122,3 +122,21 @@ func GetAuthors(db *sqlx.DB, article int) ([]Author, error) {
 
 	return authors, nil
 }
+
+func GetActiveMembers(db *sqlx.DB) ([]Member, error) {
+	var members []Member
+	err := db.Select(&members, `SELECT kth_id, prefered_name, hosted_url, title, active
+									FROM (Archive.Member FULL JOIN (
+											SELECT id AS picture, hosted_url
+												FROM Archive.External
+												WHERE type_of_external = 'image'
+											) AS ext USING(picture))
+										WHERE active = true`)
+
+	if err != nil {
+		log.Println(err)
+		return members, err
+	}
+
+	return members, nil
+}
