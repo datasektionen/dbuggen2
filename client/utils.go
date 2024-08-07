@@ -51,16 +51,15 @@ type displayMember struct {
 // creates a displaymember from a member struct, using the prefered
 // name if there is any and a html template for the picture used.
 func displaymemberize(members []database.Member) []displayMember {
-	var displaymembers []displayMember
-	for _, member := range members {
+	displaymembers := make([]displayMember, len(members))
+	for i, member := range members {
 		name := authorsName(database.Author{KthID: member.KthID, PreferedName: member.PreferedName})
-		picture := memberpicture(member.PictureURL)
-		displaymembers = append(displaymembers, displayMember{
+		displaymembers[i] = displayMember{
 			KthID:   fmt.Sprintf("redaqtionen/%v", member.KthID),
 			Name:    name,
-			Picture: picture,
+			Picture: memberpicture(member.PictureURL),
 			Title:   member.Title,
-		})
+		}
 	}
 	return displaymembers
 }
@@ -92,6 +91,7 @@ func getChefreds(DFUNKT_URL string) []string {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("unexpected http response from dfunkt: %v", resp.StatusCode)
+		return chefreds
 	}
 
 	contents, err := io.ReadAll(io.Reader(resp.Body))
