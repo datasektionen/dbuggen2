@@ -116,7 +116,8 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 	return issues, nil
 }
 
-// GetArticles retrieves a list of article IDs from the database for a given issue.
+// Gets all articles in a certain issue. Will return an error if any article
+// is not nØllesafe.
 func GetArticles(db *sqlx.DB, issue int, darkmode bool) ([]Article, error) {
 	var articles []Article
 
@@ -161,6 +162,8 @@ func GetArticle(db *sqlx.DB, issueID int, index int, darkmode bool) (Article, er
 	return article, nil
 }
 
+// Creates a list of all authors who've contributed to an issue. Lists them in
+// the order of which articles they've written.
 func GetAuthorsForIssue(db *sqlx.DB, issueID int) ([][]Author, error) {
 	type authoredArticle struct {
 		IssueIndex   int            `db:"issue_index"`
@@ -174,7 +177,8 @@ func GetAuthorsForIssue(db *sqlx.DB, issueID int) ([][]Author, error) {
 												Archive.Article FULL JOIN Archive.AuthoredBy ON 
 												Archive.Article.id = Archive.AuthoredBy.article_id)
 												USING (kth_id))
-											WHERE issue=$1 ORDER BY issue_index ASC`, issueID)
+											WHERE issue=$1 AND kth_id IS NOT NULL
+											ORDER BY issue_index ASC`, issueID)
 
 	if err != nil {
 		log.Println(err)

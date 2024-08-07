@@ -85,7 +85,13 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 
 		var issueArticles []issueArticle
 		for _, article := range articles {
-			authors := authortext(article.AuthorText, databaseAuthors[article.IssueIndex])
+			var authors string
+			if len(databaseAuthors) <= article.IssueIndex {
+				var a []database.Author
+				authors = authortext(article.AuthorText, a)
+			} else {
+				authors = authortext(article.AuthorText, databaseAuthors[article.IssueIndex])
+			}
 
 			content := mdToHTML(article.Content)
 			lastEdited := article.LastEdited.Format(time.DateOnly)
