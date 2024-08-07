@@ -59,7 +59,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		issueID, err := pathIntSeparator(c.Param("issue"))
 		if err != nil {
-			c.Redirect(http.StatusBadRequest, "")
+			c.Redirect(http.StatusBadRequest, "/")
 			return
 		}
 
@@ -67,31 +67,25 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 
 		issue, err := database.GetIssue(db, issueID, darkmode)
 		if err != nil {
-			c.Redirect(http.StatusInternalServerError, "")
+			c.Redirect(http.StatusInternalServerError, "/")
 			return
 		}
 
 		articles, err := database.GetArticles(db, issueID, darkmode)
 		if err != nil {
-			c.Redirect(http.StatusInternalServerError, "")
+			c.Redirect(http.StatusInternalServerError, "/")
+			return
+		}
+
+		databaseAuthors, err := database.GetAuthorsForIssue(db, issueID)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "/")
 			return
 		}
 
 		var issueArticles []issueArticle
 		for _, article := range articles {
-			var authors string
-			if article.AuthorText.Valid {
-				emptyAuthors := make([]database.Author, 0)
-				authors = authortext(article.AuthorText, emptyAuthors)
-			} else {
-				databaseAuthors, err := database.GetAuthors(db, article.ID)
-				if err != nil {
-					c.Redirect(http.StatusInternalServerError, "")
-					return
-				}
-
-				authors = authortext(article.AuthorText, databaseAuthors)
-			}
+			authors := authortext(article.AuthorText, databaseAuthors[article.IssueIndex])
 
 			content := mdToHTML(article.Content)
 			lastEdited := article.LastEdited.Format(time.DateOnly)
@@ -128,7 +122,7 @@ func Article(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 			c.Redirect(http.StatusInternalServerError, "")
 			return
 		}
-		authors, err := database.GetAuthors(db, article.ID)
+		authors, err := database.GetAuthorsForArticle(db, article.ID)
 		if err != nil {
 			c.Redirect(http.StatusInternalServerError, "")
 			return

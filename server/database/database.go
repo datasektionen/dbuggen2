@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"errors"
 	"log"
 
@@ -160,7 +161,43 @@ func GetArticle(db *sqlx.DB, issueID int, index int, darkmode bool) (Article, er
 	return article, nil
 }
 
-func GetAuthors(db *sqlx.DB, article int) ([]Author, error) {
+func GetAuthorsForIssue(db *sqlx.DB, issueID int) ([][]Author, error) {
+	type authoredArticle struct {
+		IssueIndex   int            `db:"issue_index"`
+		KthID        string         `db:"kth_id"`
+		PreferedName sql.NullString `db:"prefered_name"`
+	}
+
+	var authoredArticles []authoredArticle
+	err := db.Select(&authoredArticles, `SELECT issue_index, kth_id, prefered_name FROM (
+											Archive.Member FULL JOIN (
+												Archive.Article FULL JOIN Archive.AuthoredBy ON 
+												Archive.Article.id = Archive.AuthoredBy.article_id)
+												USING (kth_id))
+											WHERE issue=$1 ORDER BY issue_index ASC`, issueID)
+
+	if err != nil {
+		log.Println(err)
+
+		var a [][]Author
+		return a, err
+	}
+
+	if len(authoredArticles) == 0 {
+		var a [][]Author
+		return a, nil
+	}
+
+	authors := make([][]Author, authoredArticles[len(authoredArticles)-1].IssueIndex+1)
+
+	for _, a := range authoredArticles {
+		authors[a.IssueIndex] = append(authors[a.IssueIndex], Author{a.KthID, a.PreferedName})
+	}
+
+	return authors, nil
+}
+
+func GetAuthorsForArticle(db *sqlx.DB, article int) ([]Author, error) {
 	var authors []Author
 	err := db.Select(&authors, `SELECT kth_id, prefered_name FROM
 								(Archive.Member LEFT JOIN Archive.AuthoredBy USING(kth_id))

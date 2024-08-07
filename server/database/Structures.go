@@ -35,7 +35,7 @@ type Article struct {
 	Title      string
 	Issue      int
 	AuthorText sql.NullString `db:"author_text"`
-	IssueIndex string         `db:"issue_index"`
+	IssueIndex int            `db:"issue_index"`
 	Content    string
 	LastEdited time.Time `db:"last_edited"`
 	N0lleSafe  bool      `db:"n0lle_safe"`
