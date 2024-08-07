@@ -315,30 +315,49 @@ func TestRemoveDuplicateChefreds(t *testing.T) {
 		}
 	})
 
+	testsupp := database.Member{
+		KthID:        "testsupp",
+		PreferedName: sql.NullString{Valid: true, String: "Testerino"},
+		PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
+		Title:        "the cool one",
+		Active:       true,
+	}
+	test1 := database.Member{
+		KthID:        "test1",
+		PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
+		PictureURL:   sql.NullString{Valid: false, String: ""},
+		Title:        "1ssons frestelse",
+		Active:       true,
+	}
+	test2 := database.Member{
+		KthID:        "test2",
+		PreferedName: sql.NullString{Valid: true, String: "TE S. T"},
+		PictureURL:   sql.NullString{Valid: true, String: "darknet.org/virus.exe"},
+		Title:        "",
+		Active:       true,
+	}
+
+	chefen := database.Member{
+		KthID:        "chefen",
+		PreferedName: sql.NullString{Valid: false, String: ""},
+		PictureURL:   sql.NullString{Valid: false, String: ""},
+		Title:        "chefred",
+		Active:       true,
+	}
+	bossen := database.Member{
+		KthID:        "bossen",
+		PreferedName: sql.NullString{Valid: false, String: ""},
+		PictureURL:   sql.NullString{Valid: false, String: ""},
+		Title:        "chefred",
+		Active:       true,
+	}
+
 	t.Run("no chefred but multiple members", func(t *testing.T) {
 		chefredsIDs := make([]string, 0)
 		members := []database.Member{
-			{
-				KthID:        "testsupp",
-				PreferedName: sql.NullString{Valid: true, String: "Testerino"},
-				PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
-				Title:        "the cool one",
-				Active:       true,
-			},
-			{
-				KthID:        "test1",
-				PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "1ssons frestelse",
-				Active:       true,
-			},
-			{
-				KthID:        "test2",
-				PreferedName: sql.NullString{Valid: true, String: "TE S. T"},
-				PictureURL:   sql.NullString{Valid: true, String: "darknet.org/virus.exe"},
-				Title:        "",
-				Active:       true,
-			},
+			testsupp,
+			test1,
+			test2,
 		}
 
 		chefreds, gotMembers := removeDuplicateChefreds(chefredsIDs, members)
@@ -359,44 +378,14 @@ func TestRemoveDuplicateChefreds(t *testing.T) {
 	t.Run("multiple chefreds and members without overlap", func(t *testing.T) {
 		chefredsIDs := []string{"chefen", "bossen"}
 		members := []database.Member{
-			{
-				KthID:        "testsupp",
-				PreferedName: sql.NullString{Valid: true, String: "Testerino"},
-				PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
-				Title:        "the cool one",
-				Active:       true,
-			},
-			{
-				KthID:        "test1",
-				PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "1ssons frestelse",
-				Active:       true,
-			},
-			{
-				KthID:        "test2",
-				PreferedName: sql.NullString{Valid: true, String: "TE S. T"},
-				PictureURL:   sql.NullString{Valid: true, String: "darknet.org/virus.exe"},
-				Title:        "",
-				Active:       true,
-			},
+			testsupp,
+			test1,
+			test2,
 		}
 
 		expectedChefreds := []database.Member{
-			{
-				KthID:        "chefen",
-				PreferedName: sql.NullString{Valid: false, String: ""},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "chefred",
-				Active:       true,
-			},
-			{
-				KthID:        "bossen",
-				PreferedName: sql.NullString{Valid: false, String: ""},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "chefred",
-				Active:       true,
-			},
+			chefen,
+			bossen,
 		}
 
 		gotChefreds, gotMembers := removeDuplicateChefreds(chefredsIDs, members)
@@ -424,61 +413,19 @@ func TestRemoveDuplicateChefreds(t *testing.T) {
 	t.Run("multiple chefreds and members with some overlap", func(t *testing.T) {
 		chefredsIDs := []string{"testsupp", "bossen"}
 		members := []database.Member{
-			{
-				KthID:        "testsupp",
-				PreferedName: sql.NullString{Valid: true, String: "Testerino"},
-				PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
-				Title:        "the cool one",
-				Active:       true,
-			},
-			{
-				KthID:        "test1",
-				PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "1ssons frestelse",
-				Active:       true,
-			},
-			{
-				KthID:        "test2",
-				PreferedName: sql.NullString{Valid: true, String: "TE S. T"},
-				PictureURL:   sql.NullString{Valid: true, String: "darknet.org/virus.exe"},
-				Title:        "",
-				Active:       true,
-			},
+			testsupp,
+			test1,
+			test2,
 		}
 
 		expectedChefreds := []database.Member{
-			{
-				KthID:        "testsupp",
-				PreferedName: sql.NullString{Valid: true, String: "Testerino"},
-				PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
-				Title:        "the cool one",
-				Active:       true,
-			},
-			{
-				KthID:        "bossen",
-				PreferedName: sql.NullString{Valid: false, String: ""},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "chefred",
-				Active:       true,
-			},
+			testsupp,
+			bossen,
 		}
 
 		expectedMembers := []database.Member{
-			{
-				KthID:        "test1",
-				PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "1ssons frestelse",
-				Active:       true,
-			},
-			{
-				KthID:        "test2",
-				PreferedName: sql.NullString{Valid: true, String: "TE S. T"},
-				PictureURL:   sql.NullString{Valid: true, String: "darknet.org/virus.exe"},
-				Title:        "",
-				Active:       true,
-			},
+			test1,
+			test2,
 		}
 
 		gotChefreds, gotMembers := removeDuplicateChefreds(chefredsIDs, members)
@@ -506,37 +453,13 @@ func TestRemoveDuplicateChefreds(t *testing.T) {
 	t.Run("multiple chefreds and members with full overlap", func(t *testing.T) {
 		chefredsIDs := []string{"testsupp", "test1"}
 		members := []database.Member{
-			{
-				KthID:        "testsupp",
-				PreferedName: sql.NullString{Valid: true, String: "Testerino"},
-				PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
-				Title:        "the cool one",
-				Active:       true,
-			},
-			{
-				KthID:        "test1",
-				PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "1ssons frestelse",
-				Active:       true,
-			},
+			testsupp,
+			test1,
 		}
 
 		expectedChefreds := []database.Member{
-			{
-				KthID:        "testsupp",
-				PreferedName: sql.NullString{Valid: true, String: "Testerino"},
-				PictureURL:   sql.NullString{Valid: true, String: "rickroll.mp4"},
-				Title:        "the cool one",
-				Active:       true,
-			},
-			{
-				KthID:        "test1",
-				PreferedName: sql.NullString{Valid: true, String: "Test 1sson"},
-				PictureURL:   sql.NullString{Valid: false, String: ""},
-				Title:        "1ssons frestelse",
-				Active:       true,
-			},
+			testsupp,
+			test1,
 		}
 
 		expectedMembers := make([]database.Member, 0)
