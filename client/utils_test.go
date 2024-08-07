@@ -48,8 +48,16 @@ func TestMemberpicture(t *testing.T) {
 	}
 }
 
+func TestDisplaymemberize(t *testing.T) {
+	t.Fail()
+}
+
 func TestGetChefreds(t *testing.T) {
-	getChefreds("https://dfunkt.datasektionen.se/")
+	t.Fail()
+}
+
+func TestRemoveDuplicateChefreds(t *testing.T) {
+	t.Fail()
 }
 
 func TestAuthortext(t *testing.T) {
