@@ -66,14 +66,12 @@ func displaymemberize(members []database.Member) []displayMember {
 
 // Gets a list of current chefreds kth ids from dfunkt
 func getChefreds(DFUNKT_URL string) []string {
-	type user struct { // disgusting, horrid - eeewwww
-		Kthid string `json:"kthid"`
-	}
-	type mandate struct { // "go"... more like "no".
-		User user `json:"user"`
-	}
 	type result struct { // "json"... more like "no, son"
-		Mandates []mandate `json:"mandates"`
+		Mandates []struct { // "go"... more like "row".
+			User struct { // the boat - pshshshchhhhh
+				Kthid string `json:"kthid"`
+			} `json:"user"`
+		} `json:"mandates"`
 	}
 
 	if DFUNKT_URL[len(DFUNKT_URL)-1] != '/' { // no https://dfunkt.seapi/role/...
