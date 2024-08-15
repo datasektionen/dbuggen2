@@ -1,6 +1,8 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -26,6 +28,47 @@ func GetIssues(db *sqlx.DB) ([]Issue, error) {
 	}
 
 	return issues, nil
+}
+
+func GetIssue(db *sqlx.DB, issueID int, darkmode bool) (HomeIssue, error) {
+	var issue HomeIssue
+
+	if darkmode {
+		err := db.Get(&issue, `WITH safe_issues AS (
+									SELECT * FROM Archive.Issue
+										WHERE id IN
+											(SELECT issue FROM Archive.Article
+												WHERE n0lle_safe = TRUE)
+								)
+								SELECT id, title, publishing_date, hosted_url AS coverpage, views
+									FROM (safe_issues FULL JOIN (
+										SELECT id AS coverpage, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext
+										USING(coverpage))
+									WHERE id=$1`, issueID)
+		if err != nil {
+			log.Println(err)
+			return issue, err
+		}
+	} else {
+		err := db.Get(&issue, `SELECT id, title, publishing_date, hosted_url AS coverpage, views
+									FROM (Archive.Issue FULL JOIN (
+										SELECT id AS coverpage, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext
+										USING(coverpage))
+									WHERE id=$1`, issueID)
+
+		if err != nil {
+			log.Println(err)
+			return issue, err
+		}
+	}
+
+	return issue, nil
 }
 
 // haha.
@@ -73,13 +116,22 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 	return issues, nil
 }
 
-// GetArticles retrieves a list of article IDs from the database for a given issue.
-func GetArticles(db *sqlx.DB, issue int) ([]int, error) {
-	var articles []int
-	err := db.Get(&articles, `SELECT id FROM Archive.Article WHERE issue=$1 ORDER BY issue_index ASC`, issue)
-	if err != nil {
+// Gets all articles in a certain issue. Will return an error if any article
+// is not nØllesafe.
+func GetArticles(db *sqlx.DB, issue int, darkmode bool) ([]Article, error) {
+	var articles []Article
+
+	if err := db.Select(&articles, `SELECT * FROM Archive.Article WHERE issue=$1`, issue); err != nil {
 		log.Println(err)
 		return articles, err
+	}
+
+	if darkmode {
+		for _, article := range articles {
+			if !article.N0lleSafe {
+				return articles, errors.New("not safe")
+			}
+		}
 	}
 
 	return articles, nil
@@ -110,7 +162,46 @@ func GetArticle(db *sqlx.DB, issueID int, index int, darkmode bool) (Article, er
 	return article, nil
 }
 
-func GetAuthors(db *sqlx.DB, article int) ([]Author, error) {
+// Creates a list of all authors who've contributed to an issue. Lists them in
+// the order of which articles they've written.
+func GetAuthorsForIssue(db *sqlx.DB, issueID int) ([][]Author, error) {
+	type authoredArticle struct {
+		IssueIndex   int            `db:"issue_index"`
+		KthID        string         `db:"kth_id"`
+		PreferedName sql.NullString `db:"prefered_name"`
+	}
+
+	var authoredArticles []authoredArticle
+	err := db.Select(&authoredArticles, `SELECT issue_index, kth_id, prefered_name FROM (
+											Archive.Member FULL JOIN (
+												Archive.Article FULL JOIN Archive.AuthoredBy ON 
+												Archive.Article.id = Archive.AuthoredBy.article_id)
+												USING (kth_id))
+											WHERE issue=$1 AND kth_id IS NOT NULL
+											ORDER BY issue_index ASC`, issueID)
+
+	if err != nil {
+		log.Println(err)
+
+		var a [][]Author
+		return a, err
+	}
+
+	if len(authoredArticles) == 0 {
+		var a [][]Author
+		return a, nil
+	}
+
+	authors := make([][]Author, authoredArticles[len(authoredArticles)-1].IssueIndex+1)
+
+	for _, a := range authoredArticles {
+		authors[a.IssueIndex] = append(authors[a.IssueIndex], Author{a.KthID, a.PreferedName})
+	}
+
+	return authors, nil
+}
+
+func GetAuthorsForArticle(db *sqlx.DB, article int) ([]Author, error) {
 	var authors []Author
 	err := db.Select(&authors, `SELECT kth_id, prefered_name FROM
 								(Archive.Member LEFT JOIN Archive.AuthoredBy USING(kth_id))
@@ -121,4 +212,22 @@ func GetAuthors(db *sqlx.DB, article int) ([]Author, error) {
 	}
 
 	return authors, nil
+}
+
+func GetActiveMembers(db *sqlx.DB) ([]Member, error) {
+	var members []Member
+	err := db.Select(&members, `SELECT kth_id, prefered_name, hosted_url, title, active
+									FROM (Archive.Member FULL JOIN (
+											SELECT id AS picture, hosted_url
+												FROM Archive.External
+												WHERE type_of_external = 'image'
+											) AS ext USING(picture))
+										WHERE active = true`)
+
+	if err != nil {
+		log.Println(err)
+		return members, err
+	}
+
+	return members, nil
 }
