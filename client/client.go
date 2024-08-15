@@ -142,3 +142,24 @@ func Article(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 		})
 	}
 }
+
+// Page for all of (active) redaqtionen to be shown to the world
+func Redaqtionen(db *sqlx.DB, DFUNKT_URL string) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		members, err := database.GetActiveMembers(db)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "")
+			return
+		}
+
+		chefredIDs := getChefreds(DFUNKT_URL)
+		chefreds, members := removeDuplicateChefreds(chefredIDs, members)
+		displaymembers := displaymemberize(members)
+		displayChefreds := displaymemberize(chefreds)
+
+		c.HTML(http.StatusOK, "redaqtionen.html", gin.H{
+			"chefreds": displayChefreds,
+			"members":  displaymembers,
+		})
+	}
+}

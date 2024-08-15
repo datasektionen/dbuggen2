@@ -6,9 +6,11 @@ import (
 )
 
 type Member struct {
-	Kth_id string
-	Title  string
-	Active bool
+	KthID        string         `db:"kth_id"`
+	PreferedName sql.NullString `db:"prefered_name"`
+	PictureURL   sql.NullString `db:"hosted_url"`
+	Title        string
+	Active       bool
 }
 
 type Issue struct {

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<body>
+    {{template "index" .}}
+    <main>
+        <h1>redaqtionen</h1>
+        {{range .chefreds}}
+            <a href={{.KthID}}>
+                {{.Picture}}
+                <h2>{{.Name}}</h2>
+                <p>{{.Title}}</p>
+                <br>
+            </a>
+            <br>
+        {{end}}
+        {{range .members}}
+            <a href={{.KthID}}>
+                {{.Picture}}
+                <h2>{{.Name}}</h2>
+                <p>{{.Title}}</p>
+                <br>
+            </a>
+            <br>
+        {{end}}
+    </main>
+</body>
