@@ -51,7 +51,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	type issueArticle struct {
 		Title       string
 		ArticleLink string
-		Authors     string
+		Authors     template.HTML
 		Content     template.HTML
 		LastEdited  string
 	}
@@ -85,7 +85,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 
 		var issueArticles []issueArticle
 		for _, article := range articles {
-			var authors string
+			var authors template.HTML
 			if len(databaseAuthors) <= article.IssueIndex {
 				var a []database.Author
 				authors = authortext(article.AuthorText, a)
