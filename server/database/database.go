@@ -231,3 +231,44 @@ func GetActiveMembers(db *sqlx.DB) ([]Member, error) {
 
 	return members, nil
 }
+
+func GetMember(db *sqlx.DB, kthID string) (Member, error) {
+	var member Member
+	err := db.Get(&member, `SELECT kth_id, prefered_name, hosted_url, title, active
+								FROM (Archive.Member FULL JOIN (
+										SELECT id AS picture, hosted_url
+											FROM Archive.External
+											WHERE type_of_external = 'image'
+										) AS ext USING(picture))
+									WHERE kth_id=$1`, kthID)
+
+	if err != nil {
+		return member, err
+	}
+	return member, nil
+}
+
+func GetMembersArticles(db *sqlx.DB, kthID string, darkmode bool) ([]Article, error) {
+	var articles []Article
+	if darkmode {
+		err := db.Select(&articles, `SELECT id, title, issue, author_text, issue_index, 
+											content, last_edited, n0lle_safe
+										FROM (Archive.Article LEFT JOIN 
+												Archive.AuthoredBy ON article_id=id)
+											WHERE kth_id=$1 AND n0lle_safe=TRUE`, kthID)
+		if err != nil {
+			return articles, err
+		}
+	} else {
+		err := db.Select(&articles, `SELECT id, title, issue, author_text, issue_index, 
+											content, last_edited, n0lle_safe
+										FROM (Archive.Article LEFT JOIN 
+												Archive.AuthoredBy ON article_id=id)
+											WHERE kth_id=$1`, kthID)
+		if err != nil {
+			return articles, err
+		}
+	}
+
+	return articles, nil
+}
