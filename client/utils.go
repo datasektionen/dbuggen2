@@ -137,12 +137,13 @@ func removeDuplicateChefreds(chefredIDs []string, members []database.Member) ([]
 	return chefreds, members
 }
 
-// authortext returns the author text based on the given AuthorText and authors.
+// authortext returns the author text based on the given AuthorText and authors, wrapped
+// in a html template.
 // If AuthorText is valid, it returns the AuthorText string. Otherwise, it constructs
 // the author text using the names of the authors.
-func authortext(AuthorText sql.NullString, authors []database.Author) string {
+func authortext(AuthorText sql.NullString, authors []database.Author) template.HTML {
 	if AuthorText.Valid {
-		return AuthorText.String
+		return template.HTML(AuthorText.String)
 	}
 
 	if len(authors) == 0 {
@@ -152,17 +153,24 @@ func authortext(AuthorText sql.NullString, authors []database.Author) string {
 	var sb strings.Builder
 	sb.WriteString("Skriven av ")
 
-	sb.WriteString(authorsName(authors[0]))
+	sb.WriteString(string(authorURL(authorsName(authors[0]), authors[0].KthID)))
 	if len(authors) == 1 {
-		return sb.String()
+		return template.HTML(sb.String())
 	}
 
 	for i := 1; i < len(authors)-1; i++ {
-		sb.WriteString(fmt.Sprintf(", %v", authorsName(authors[i])))
+		sb.WriteString(fmt.Sprintf(", %v",
+			authorURL(authorsName(authors[i]), authors[i].KthID)))
 	}
 
-	sb.WriteString(fmt.Sprintf(" och %v", authorsName(authors[len(authors)-1])))
-	return sb.String()
+	sb.WriteString(fmt.Sprintf(" och %v",
+		authorURL(authorsName(authors[len(authors)-1]), authors[len(authors)-1].KthID)))
+	return template.HTML(sb.String())
+}
+
+func authorURL(name string, kthID string) template.HTML {
+	url := fmt.Sprintf(`<a href="/redaqtionen/%v">%v</a>`, kthID, name)
+	return template.HTML(url)
 }
 
 // authorsName returns the preferred name of an author from the database.

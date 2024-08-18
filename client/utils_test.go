@@ -3,6 +3,7 @@ package client
 import (
 	"database/sql"
 	"dbuggen/server/database"
+	"html/template"
 	"net/http"
 	"strconv"
 	"sync"
@@ -485,7 +486,7 @@ func TestAuthortext(t *testing.T) {
 	// Test case 1: Valid AuthorText
 	authorText := sql.NullString{String: "Skriven av Test Testström", Valid: true}
 	authors := []database.Author{{PreferedName: sql.NullString{String: "Ej Korrektström", Valid: true}, KthID: "testsupp"}}
-	expected := "Skriven av Test Testström"
+	expected := template.HTML("Skriven av Test Testström")
 	got := authortext(authorText, authors)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
@@ -507,7 +508,7 @@ func TestAuthortext(t *testing.T) {
 		{PreferedName: sql.NullString{String: "Skämt Skojsdotter", Valid: true}, KthID: "sskoj"},
 		{PreferedName: sql.NullString{String: "", Valid: false}, KthID: "testsupp"},
 	}
-	expected = "Skriven av Skribent Skrivarsson, Skämt Skojsdotter och test support"
+	expected = `Skriven av <a href="/redaqtionen/skribson">Skribent Skrivarsson</a>, <a href="/redaqtionen/sskoj">Skämt Skojsdotter</a> och <a href="/redaqtionen/testsupp">test support</a>`
 	got = authortext(authorText, authors)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)
@@ -516,7 +517,7 @@ func TestAuthortext(t *testing.T) {
 	// Test case 4: No AuthorText with single author
 	authorText = sql.NullString{String: "", Valid: false}
 	authors = []database.Author{{PreferedName: sql.NullString{String: "Testare #1", Valid: true}, KthID: "testsupp"}}
-	expected = "Skriven av Testare #1"
+	expected = `Skriven av <a href="/redaqtionen/testsupp">Testare #1</a>`
 	got = authortext(authorText, authors)
 	if got != expected {
 		t.Errorf("got %v, wanted %v", got, expected)

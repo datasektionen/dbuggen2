@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<body>
+    {{template "index" .}}
+    <main>
+        {{.picture}}
+        <h1>{{.name}}</h1>
+        <h2>{{.title}}</h2>
+        <p>{{.status}}</p>
+
+        <h3>Artiklar:</h3>
+        {{range .articles}}
+            <a href={{.URL}}>
+                {{.Title}}
+            </a>
+            <br>
+        {{end}}
+    </main>
+</body>
