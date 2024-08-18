@@ -137,7 +137,8 @@ func removeDuplicateChefreds(chefredIDs []string, members []database.Member) ([]
 	return chefreds, members
 }
 
-// authortext returns the author text based on the given AuthorText and authors.
+// authortext returns the author text based on the given AuthorText and authors, wrapped
+// in a html template.
 // If AuthorText is valid, it returns the AuthorText string. Otherwise, it constructs
 // the author text using the names of the authors.
 func authortext(AuthorText sql.NullString, authors []database.Author) template.HTML {
