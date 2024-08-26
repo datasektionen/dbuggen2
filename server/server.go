@@ -27,6 +27,7 @@ func Start(db *sqlx.DB, conf *config.Config) {
 
 	r.GET("/", client.Home(db, &ds))
 	r.GET("issue/:issue", client.Issue(db, &ds))
+	r.GET("issue/:issue/edit", client.EditIssue(db))
 	r.GET("issue/:issue/:article", client.Article(db, &ds))
 	r.GET("redaqtionen", client.Redaqtionen(db, conf.DFUNKT_URL))
 

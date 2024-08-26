@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<body>
+    {{template "index" .}}
+    <main>
+        <form>
+            <!-- Information about the whole issue -->
+            <label for="issueTitle">Title</label>
+            <br>
+            <input type="text" id="issueTitle" name="issueTitle" value={{.issueTitle}}>
+            <br>
+            <label for="publishingDate">Publishing date</label>
+            <br>
+            <input type="datetime" id="publishingDate" name="publishingDate" value={{.publishingDate}}>
+            <br>
+            <label for="pdfFile">PDF version</label>
+            <br>
+            <input type="file" id="pdfFile" name="pdfFile">
+            <br>
+            <label for="coverpage">Coverpage</label>
+            <br>
+            <input type="file" id="coverpage" name="coverpage">
+            <br>
+            
+            <!-- Information about individual articles -->
+            {{range .articles}}
+                <hr>
+
+                <label for={{.ArticleTitleID}}>Article title</label>
+                <br>
+                <input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
+                <br>
+                <label for={{.AuthortextID}}>Author text</label>
+                <br>
+                <input type="text" id={{.AuthortextID}} name={{.AuthortextID}} value={{.Authortext}}>
+                <br>
+                <label for={{.AuthorsID}}>Authors</label>
+                <br>
+                <input type="text" id={{.AuthorsID}} name={{.AuthorsID}} value={{.Authors}}>
+                <br>
+                <label for={{.NØlleSafeID}}>nØlle safe</label>
+                <input type="checkbox" id={{.NØlleSafeID}} name={{.NØlleSafeID}} value={{.NØllesafe}}>
+                <br>
+
+                <label for={{.ContentID}}>Content</label>
+                <br>
+                <input type="text" id={{.ContentID}} name={{.ContentID}} value={{.Content}}>
+                <br>
+            {{end}}
+
+            <!-- Save -->
+            <hr>
+            <input type="submit" value="Save">
+        </form>
+    </main>
+</body>

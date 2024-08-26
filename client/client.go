@@ -113,6 +113,79 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	}
 }
 
+func EditIssue(db *sqlx.DB) func(c *gin.Context) {
+	type editableArticle struct {
+		ArticleTitle   string
+		ArticleTitleID string
+		Authortext     string
+		AuthortextID   string
+		Authors        string
+		AuthorsID      string
+		NØllesafe      bool
+		NØlleSafeID    string
+		Content        string
+		ContentID      string
+	}
+
+	return func(c *gin.Context) {
+		issueID, err := pathIntSeparator(c.Param("issue"))
+		if err != nil {
+			c.Redirect(http.StatusBadRequest, "/")
+			return
+		}
+
+		issue, err := database.GetIssue(db, issueID, false)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "/")
+			return
+		}
+
+		articles, err := database.GetArticles(db, issueID, false)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "/")
+			return
+		}
+
+		// databaseAuthors, err := database.GetAuthorsForIssue(db, issueID)
+		// if err != nil {
+		// 	c.Redirect(http.StatusInternalServerError, "/")
+		// 	return
+		// }
+
+		var editableArticles []editableArticle
+		for _, article := range articles {
+			// var authors string
+			// if len(databaseAuthors) <= article.IssueIndex {
+			// 	var a []database.Author
+			// 	authors = authortext(article.AuthorText, a)
+			// } else {
+			// 	authors = authortext(article.AuthorText, databaseAuthors[article.IssueIndex])
+			// }
+
+			issueArticle := editableArticle{
+				ArticleTitle:   article.Title,
+				ArticleTitleID: fmt.Sprintf("%vTitle", article.IssueIndex),
+				Authortext:     article.AuthorText.String,
+				AuthortextID:   fmt.Sprintf("%vAuthortext", article.IssueIndex),
+				Authors:        "bung",
+				AuthorsID:      fmt.Sprintf("%vAuthors", article.IssueIndex),
+				NØllesafe:      article.N0lleSafe,
+				NØlleSafeID:    fmt.Sprintf("%vNØllesafe", article.IssueIndex),
+				Content:        article.Content,
+				ContentID:      fmt.Sprintf("%vContent", article.IssueIndex),
+			}
+			editableArticles = append(editableArticles, issueArticle)
+		}
+
+		c.HTML(http.StatusOK, "edit_issue.html", gin.H{
+			// "coverpage":  coverpage(issue.Coverpage),
+			"issueTitle":     issue.Title,
+			"publishingDate": issue.PublishingDate,
+			"articles":       editableArticles,
+		})
+	}
+}
+
 // Arbitrary article
 func Article(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	return func(c *gin.Context) {
