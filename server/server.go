@@ -2,6 +2,7 @@ package server
 
 import (
 	"html/template"
+	"io/fs"
 	"net/http"
 	"sync"
 	"time"
@@ -13,14 +14,19 @@ import (
 	"dbuggen/config"
 )
 
+func must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
 // Start starts the server and initializes the routes and templates.
 func Start(db *sqlx.DB, conf *config.Config) {
 	r := gin.Default()
-	tmpl := template.Must(template.ParseGlob("client/html/*.html"))
-	r.SetHTMLTemplate(tmpl)
+	r.SetHTMLTemplate(template.Must(template.ParseFS(client.HTMLTemplates, "**/*.html")))
 
-	r.Static("css", "client/css")
-	r.Static("assets", "assets")
+	r.StaticFS("public", http.FS(must(fs.Sub(client.PublicFiles, "public"))))
 
 	var ds client.DarkmodeStatus
 	initDarkmode(&ds, conf.DARKMODE_URL)

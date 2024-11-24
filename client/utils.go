@@ -34,7 +34,7 @@ func memberpicture(picture sql.NullString) template.HTML {
 	if picture.Valid {
 		pic = picture.String
 	} else {
-		pic = "/assets/default_member.svg"
+		pic = "/public/default_member.svg"
 	}
 	return template.HTML(fmt.Sprintf(`<img src="%v" style="max-width: 10vw;">`, template.HTMLEscapeString(pic)))
 }
