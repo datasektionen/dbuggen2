@@ -7,7 +7,9 @@
 	<title>{{ .pagetitle }}</title>
 	<link rel="stylesheet" href="/public/index.css"> <!-- The CSS -->
 	<link rel="icon" href="/public/favicon.png"> <!-- The favicon -->
-	<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
+	<!-- <script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script> -->
+	<script src="/public/packages/htmx.min.js"></script> <!-- HTMX 2.0.3 -->
+	<script src="/public/packages/Sortable.min.js"></script> <!-- Sortable.js 1.15.4 -->
 	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 {{ template "navbar" . }} <!-- The navbar -->
