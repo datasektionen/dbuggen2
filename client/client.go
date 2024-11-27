@@ -1,6 +1,7 @@
 package client
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -12,12 +13,18 @@ import (
 	"dbuggen/server/database"
 )
 
+//go:embed html/*.html
+var HTMLTemplates embed.FS
+
+//go:embed public/*
+var PublicFiles embed.FS
+
 // Home page
 func Home(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		issuesRaw, err := database.GetHomeIssues(db, Darkmode(ds))
 		if err != nil {
-			c.Redirect(http.StatusInternalServerError, "")
+			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 

@@ -43,7 +43,7 @@ func TestMemberpicture(t *testing.T) {
 	// Test case 2: Invalid picture
 	t.Run("invalid picture", func(t *testing.T) {
 		mp := sql.NullString{String: "", Valid: false}
-		expected := `<img src="/assets/default_member.svg" style="max-width: 10vw;">`
+		expected := `<img src="/public/default_member.svg" style="max-width: 10vw;">`
 		got := memberpicture(mp)
 		if string(got) != expected {
 			t.Errorf("got %v, wanted %v", got, expected)

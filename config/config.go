@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -14,9 +13,7 @@ type Config struct {
 }
 
 func GetConfig() *Config {
-	if err := godotenv.Load(".env"); err != nil {
-		fmt.Println(err)
-	}
+	_ = godotenv.Load()
 
 	conf := Config{
 		DATABASE_URL: os.Getenv("DATABASE_URL"),
