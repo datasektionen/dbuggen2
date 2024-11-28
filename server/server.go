@@ -37,6 +37,8 @@ func Start(db *sqlx.DB, conf *config.Config) {
 	r.GET("issue/:issue/:article", client.Article(db, &ds))
 	r.GET("redaqtionen", client.Redaqtionen(db, conf.DFUNKT_URL))
 
+	r.POST("issue/:issue/save", saveIssue(db))
+
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})

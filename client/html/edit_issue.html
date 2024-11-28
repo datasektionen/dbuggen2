@@ -12,18 +12,17 @@
 				handle: '.handle',
 				ghostClass: 'blue-background-class',
 
+				// Keep a list of what order the articles are in
 				onSort: function(evt) {
 					const order = Array.from(evt.to.children).map(el => el.getAttribute('id'));
       				document.getElementById('order-input').value = order.join(',');
 				},
 			});
 		}})
-
-
 	</script>
 
     <main>
-		<form method="post", action="/submit">
+		<form hx-post="save" hx-encoding="multipart/form-data">
 			<!-- Information about the whole issue -->
 			<div class="issueInfo">
 				<label for="issueTitle">Title</label>

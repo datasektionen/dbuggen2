@@ -74,7 +74,7 @@ func getChefreds(DFUNKT_URL string) []string {
 		} `json:"mandates"`
 	}
 
-	if DFUNKT_URL[len(DFUNKT_URL)-1] != '/' { // no https://dfunkt.seapi/role/...
+	if DFUNKT_URL[len(DFUNKT_URL)-1] != '/' { // no https://dfunkt.se/api/role/...
 		DFUNKT_URL = fmt.Sprintf("%v/", DFUNKT_URL)
 	}
 
