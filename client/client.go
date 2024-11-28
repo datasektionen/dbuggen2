@@ -122,6 +122,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 
 func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 	type editableArticle struct {
+		ArticleID      int
 		ArticleTitle   string
 		ArticleTitleID string
 		Authortext     string
@@ -170,16 +171,17 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 			// }
 
 			issueArticle := editableArticle{
+				ArticleID:      article.ID,
 				ArticleTitle:   article.Title,
-				ArticleTitleID: fmt.Sprintf("%vTitle", article.IssueIndex),
+				ArticleTitleID: fmt.Sprintf("%v_Title", article.ID),
 				Authortext:     article.AuthorText.String,
-				AuthortextID:   fmt.Sprintf("%vAuthortext", article.IssueIndex),
+				AuthortextID:   fmt.Sprintf("%v_Authortext", article.ID),
 				Authors:        "bung",
-				AuthorsID:      fmt.Sprintf("%vAuthors", article.IssueIndex),
+				AuthorsID:      fmt.Sprintf("%v_Authors", article.ID),
 				NØllesafe:      article.N0lleSafe,
-				NØlleSafeID:    fmt.Sprintf("%vNØllesafe", article.IssueIndex),
+				NØlleSafeID:    fmt.Sprintf("%v_NØllesafe", article.ID),
 				Content:        article.Content,
-				ContentID:      fmt.Sprintf("%vContent", article.IssueIndex),
+				ContentID:      fmt.Sprintf("%v_Content", article.ID),
 			}
 			editableArticles = append(editableArticles, issueArticle)
 		}

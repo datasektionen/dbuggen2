@@ -1,81 +1,147 @@
 <!DOCTYPE html>
 
-<script>
-    htmx.onLoad(function(content) {
-    var sortables = content.querySelectorAll(".sortable");
-    for (var i = 0; i < sortables.length; i++) {
-        var sortable = sortables[i];
-        var sortableInstance = new Sortable(sortable, {
-            animation: 150,
-            handle: '.handle',
-            ghostClass: 'blue-background-class',
-
-            // Make the `.issueInfo` unsortable
-            filter: ".issueInfo",
-            onMove: function (evt) {
-                return evt.related.className.indexOf('issueInfo') === -1;
-            },
-        });
-    }
-})
-</script>
-
 <body>
     {{template "index" .}}
+	<script>
+		htmx.onLoad(function(content) {
+		var sortables = content.querySelectorAll(".sortable");
+		for (var i = 0; i < sortables.length; i++) {
+			var sortable = sortables[i];
+			var sortableInstance = new Sortable(sortable, {
+				animation: 150,
+				handle: '.handle',
+				ghostClass: 'blue-background-class',
+
+				onSort: function(evt) {
+					const order = Array.from(evt.to.children).map(el => el.getAttribute('id'));
+      				document.getElementById('order-input').value = order.join(',');
+				},
+			});
+		}})
+
+
+	</script>
+
     <main>
-      <form class="sortable">
-        <!-- Information about the whole issue -->
-        <!-- Not sortable -->
-        <div class="issueInfo">
-            <label for="issueTitle">Title</label>
-            <br>
-            <input type="text" id="issueTitle" name="issueTitle" value={{.issueTitle}}>
-            <br>
-            <label for="publishingDate">Publishing date</label>
-            <br>
-            <input type="datetime" id="publishingDate" name="publishingDate" value={{.publishingDate}}>
-            <br>
-            <label for="pdfFile">PDF version</label>
-            <br>
-            <input type="file" id="pdfFile" name="pdfFile">
-            <br>
-            <label for="coverpage">Coverpage</label>
-            <br>
-            <input type="file" id="coverpage" name="coverpage">
-            <br>
-        </div>
+		<form method="post", action="/submit">
+			<!-- Information about the whole issue -->
+			<div class="issueInfo">
+				<label for="issueTitle">Title</label>
+				<br>
+				<input type="text" id="issueTitle" name="issueTitle" value={{.issueTitle}}>
+				<br>
+				<label for="publishingDate">Publishing date</label>
+				<br>
+				<input type="datetime" id="publishingDate" name="publishingDate" value={{.publishingDate}}>
+				<br>
+				<label for="pdfFile">PDF version</label>
+				<br>
+				<input type="file" id="pdfFile" name="pdfFile">
+				<br>
+				<label for="coverpage">Coverpage</label>
+				<br>
+				<input type="file" id="coverpage" name="coverpage">
+				<br>
+			</div>
 
-        <!-- Information about individual articles -->
-        {{range .articles}}
-        <div class="">
-            <hr>
-            <h3 class="handle">X</h3>
-            <label for={{.ArticleTitleID}}>Article title</label>
-            <br>
-            <input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
-            <br>
-            <label for={{.AuthortextID}}>Author text</label>
-            <br>
-            <input type="text" id={{.AuthortextID}} name={{.AuthortextID}} value={{.Authortext}}>
-            <br>
-            <label for={{.AuthorsID}}>Authors</label>
-            <br>
-            <input type="text" id={{.AuthorsID}} name={{.AuthorsID}} value={{.Authors}}>
-            <br>
-            <label for={{.NØlleSafeID}}>nØlle safe</label>
-            <input type="checkbox" id={{.NØlleSafeID}} name={{.NØlleSafeID}} value={{.NØllesafe}}>
-            <br>
+			<!-- Information about individual articles -->
+			<div class="sortable" id="article-container">
+				{{range .articles}}
+				<div class="article-div" id={{.ArticleID}}>
+					<hr>
 
-            <label for={{.ContentID}}>Content</label>
-            <br>
-            <input type="text" id={{.ContentID}} name={{.ContentID}} value={{.Content}}>
-            <br>
-        </div>
-        {{end}}
+					<h3 class="handle">X</h3>
+					<label for={{.ArticleTitleID}}>Article title</label>
+					<br>
+					<input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
+					<br>
+					<label for={{.AuthortextID}}>Author text</label>
+					<br>
+					<input type="text" id={{.AuthortextID}} name={{.AuthortextID}} value={{.Authortext}}>
+					<br>
+					<label for={{.AuthorsID}}>Authors</label>
+					<br>
+					<input type="text" id={{.AuthorsID}} name={{.AuthorsID}} value={{.Authors}}>
+					<br>
+					<label for={{.NØlleSafeID}}>nØlle safe</label>
+					<input type="checkbox" id={{.NØlleSafeID}} name={{.NØlleSafeID}} value={{.NØllesafe}}>
+					<br>
 
-        <!-- Save -->
-        <hr>
-        <input type="submit" value="Save">
-      </form>
+					<label for={{.ContentID}}>Content</label>
+					<br>
+					<input type="text" id={{.ContentID}} name={{.ContentID}} value={{.Content}}>
+					<br>
+				</div>
+				{{end}}
+			</div>
+
+			<input type="hidden" name="order" id="order-input">
+
+			<hr>
+
+			<input type="submit" value="Save">
+		</form>
+
+		<button id="add-article-btn">Add New Article</button>
     </main>
 </body>
+
+<!-- Template of article-div for adding more articles -->
+<template id="new-article-template">
+	<div class="article-div" id="">
+		<hr>
+
+		<h3 class="handle">X</h3>
+        <label for="_Title">Article title</label>
+        <br>
+        <input type="text" id="_Title" name="_Title" placeholder="Enter title">
+        <br>
+        <label for="_Authortext">Author text</label>
+        <br>
+        <input type="text" id="_Authortext" name="_Authortext" placeholder="Enter author text">
+        <br>
+        <label for="_Authors">Authors</label>
+        <br>
+        <input type="text" id="_Authors" name="_Authors" placeholder="Enter authors">
+        <br>
+        <label for="_NØllesafe">nØlle safe</label>
+        <input type="checkbox" id="_NØllesafe" name="_NØllesafe">
+        <br>
+        <label for="_Content">Content</label>
+        <br>
+        <input type="text" id="_Content" name="_Content" placeholder="Enter content">
+        <br>
+	</div>
+</template>
+
+<script>
+	/**
+	 * Allows for adding more articles on the client side. These new articles
+	 * will have a negative ID value as they have not yet been added to the database.
+	*/
+	let articleCounter = -1;
+
+	document.getElementById('add-article-btn').addEventListener('click', function () {
+		const template = document.getElementById('new-article-template');
+		const articlesContainer = document.getElementById('article-container');
+
+		const newArticle = template.content.cloneNode(true);
+		const articleElement = newArticle.querySelector('.article-div');
+		articleElement.setAttribute('id', articleCounter);
+
+		const inputs = newArticle.querySelectorAll('input');
+		inputs.forEach((input) => {
+			const originalName = input.getAttribute('name');
+			const articleID = `${articleCounter}${originalName}`
+			input.setAttribute('name', articleID);
+			input.setAttribute('id', articleID);
+			const label = newArticle.querySelector(`label[for="${originalName}"]`);
+			if (label) {
+				label.setAttribute('for', articleID);
+			}
+		});
+
+		articlesContainer.appendChild(newArticle);
+		articleCounter--;
+	});
+</script>
