@@ -58,7 +58,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	type issueArticle struct {
 		Title       string
 		ArticleLink string
-		Authors     string
+		Authors     template.HTML
 		Content     template.HTML
 		LastEdited  string
 	}
@@ -92,7 +92,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 
 		var issueArticles []issueArticle
 		for _, article := range articles {
-			var authors string
+			var authors template.HTML
 			if len(databaseAuthors) <= article.IssueIndex {
 				var a []database.Author
 				authors = authortext(article.AuthorText, a)
@@ -167,6 +167,52 @@ func Redaqtionen(db *sqlx.DB, DFUNKT_URL string) func(c *gin.Context) {
 		c.HTML(http.StatusOK, "redaqtionen.html", gin.H{
 			"chefreds": displayChefreds,
 			"members":  displaymembers,
+		})
+	}
+}
+
+// Page for individual members
+func Member(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		memberID := c.Param("member")
+
+		member, err := database.GetMember(db, memberID)
+		if err != nil {
+			c.Redirect(http.StatusNotFound, "")
+			return
+		}
+		displaymember := displaymemberize([]database.Member{member})[0]
+		var status string
+		if !member.Active {
+			status = "Inte längre aktiv medlem i redaqtionen"
+		}
+
+		darkmode := Darkmode(ds)
+		articles, err := database.GetMembersArticles(db, memberID, darkmode)
+		if err != nil {
+			c.Redirect(http.StatusInternalServerError, "")
+			return
+		}
+
+		type memberArticle struct {
+			Title string
+			URL   string
+		}
+
+		memberArticles := make([]memberArticle, len(articles))
+		for i, article := range articles {
+			memberArticles[i] = memberArticle{
+				Title: article.Title,
+				URL:   fmt.Sprintf("/issue/%v/%v", article.Issue, article.IssueIndex),
+			}
+		}
+
+		c.HTML(http.StatusOK, "member.html", gin.H{
+			"picture":  displaymember.Picture,
+			"name":     displaymember.Name,
+			"title":    displaymember.Title,
+			"status":   status,
+			"articles": memberArticles,
 		})
 	}
 }
