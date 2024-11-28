@@ -1,49 +1,31 @@
 <!DOCTYPE html>
 
-
 <body>
     {{template "index" .}}
     <main>
       <script>
-        // import Sortable from 'sortablejs';
         htmx.onLoad(function(content) {
         var sortables = content.querySelectorAll(".sortable");
         for (var i = 0; i < sortables.length; i++) {
           var sortable = sortables[i];
           var sortableInstance = new Sortable(sortable, {
-              animation: 150,
-              ghostClass: 'blue-background-class',
+            animation: 150,
+            handle: '.handle',
+            ghostClass: 'blue-background-class',
 
-              // Make the `.htmx-indicator` unsortable
-              filter: ".htmx-indicator",
-              onMove: function (evt) {
-                return evt.related.className.indexOf('htmx-indicator') === -1;
-              },
-
-              // // Disable sorting on the `end` event
-              // onEnd: function (evt) {
-              //   this.option("disabled", true);
-              // }
-          });
-
-          // Re-enable sorting on the `htmx:afterSwap` event
-          sortable.addEventListener("htmx:afterSwap", function() {
-            sortableInstance.option("disabled", false);
+            // Make the `.issueInfo` unsortable
+            filter: ".issueInfo",
+            onMove: function (evt) {
+              return evt.related.className.indexOf('issueInfo') === -1;
+            },
           });
         }
     })
     </script>
-    <form class="sortable" hx-post="/items" hx-trigger="end">
-        <div class="htmx-indicator">Updating...</div>
-        <div><input type='hidden' name='item' value='1'/>Item 1</div>
-        <div><input type='hidden' name='item' value='2'/>Item 2</div>
-        <div><input type='hidden' name='item' value='3'/>Item 3</div>
-        <div><input type='hidden' name='item' value='4'/>Item 4</div>
-        <div><input type='hidden' name='item' value='5'/>Item 5</div>
-    </form>
-
-        <form>
-            <!-- Information about the whole issue -->
+        <form class="sortable">
+          <!-- Information about the whole issue -->
+          <!-- Not sortable -->
+          <div class="issueInfo">
             <label for="issueTitle">Title</label>
             <br>
             <input type="text" id="issueTitle" name="issueTitle" value={{.issueTitle}}>
@@ -60,36 +42,39 @@
             <br>
             <input type="file" id="coverpage" name="coverpage">
             <br>
+          </div>
 
-            <!-- Information about individual articles -->
-            {{range .articles}}
-                <hr>
-
-                <label for={{.ArticleTitleID}}>Article title</label>
-                <br>
-                <input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
-                <br>
-                <label for={{.AuthortextID}}>Author text</label>
-                <br>
-                <input type="text" id={{.AuthortextID}} name={{.AuthortextID}} value={{.Authortext}}>
-                <br>
-                <label for={{.AuthorsID}}>Authors</label>
-                <br>
-                <input type="text" id={{.AuthorsID}} name={{.AuthorsID}} value={{.Authors}}>
-                <br>
-                <label for={{.NØlleSafeID}}>nØlle safe</label>
-                <input type="checkbox" id={{.NØlleSafeID}} name={{.NØlleSafeID}} value={{.NØllesafe}}>
-                <br>
-
-                <label for={{.ContentID}}>Content</label>
-                <br>
-                <input type="text" id={{.ContentID}} name={{.ContentID}} value={{.Content}}>
-                <br>
-            {{end}}
-
-            <!-- Save -->
+          <!-- Information about individual articles -->
+          {{range .articles}}
+          <div class="">
             <hr>
-            <input type="submit" value="Save">
+            <h3 class="handle">X</h3>
+            <label for={{.ArticleTitleID}}>Article title</label>
+            <br>
+            <input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
+            <br>
+            <label for={{.AuthortextID}}>Author text</label>
+            <br>
+            <input type="text" id={{.AuthortextID}} name={{.AuthortextID}} value={{.Authortext}}>
+            <br>
+            <label for={{.AuthorsID}}>Authors</label>
+            <br>
+            <input type="text" id={{.AuthorsID}} name={{.AuthorsID}} value={{.Authors}}>
+            <br>
+            <label for={{.NØlleSafeID}}>nØlle safe</label>
+            <input type="checkbox" id={{.NØlleSafeID}} name={{.NØlleSafeID}} value={{.NØllesafe}}>
+            <br>
+
+            <label for={{.ContentID}}>Content</label>
+            <br>
+            <input type="text" id={{.ContentID}} name={{.ContentID}} value={{.Content}}>
+            <br>
+          </div>
+          {{end}}
+
+          <!-- Save -->
+          <hr>
+          <input type="submit" value="Save">
         </form>
     </main>
 </body>
