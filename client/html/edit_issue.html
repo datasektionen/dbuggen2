@@ -15,6 +15,7 @@
 				// Keep a list of what order the articles are in
 				onSort: function(evt) {
 					const order = Array.from(evt.to.children).map(el => el.getAttribute('id'));
+					console.log(order)
       				document.getElementById('order-input').value = order.join(',');
 				},
 			});
@@ -49,7 +50,7 @@
 				<div class="article-div" id={{.ArticleID}}>
 					<hr>
 
-					<h3 class="handle">X</h3>
+					<h3 class="handle">::</h3>
 					<label for={{.ArticleTitleID}}>Article title</label>
 					<br>
 					<input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
@@ -74,7 +75,7 @@
 				{{end}}
 			</div>
 
-			<input type="hidden" name="order-input" id="order-input">
+			<input type="hidden" name="order-input" id="order-input" value={{.articleOrder}}>
 
 			<hr>
 
@@ -91,7 +92,7 @@
 	<div class="article-div" id="">
 		<hr>
 
-		<h3 class="handle">X</h3>
+		<h3 class="handle">::</h3>
         <label for="_Title">Article title</label>
         <br>
         <input type="text" id="_Title" name="_Title" placeholder="Enter title">
@@ -142,6 +143,12 @@
 		});
 
 		articlesContainer.appendChild(newArticle);
+
+		const orderForm = document.getElementById('order-input');
+		var order = orderForm.value
+		orderForm.value = order.concat(",", articleCounter);
+		console.log(orderForm.value)
+
 		articleCounter--;
 	});
 </script>

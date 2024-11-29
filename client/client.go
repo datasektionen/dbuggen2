@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -160,6 +162,8 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 		// 	return
 		// }
 
+		articleOrder := strings.Builder{}
+
 		var editableArticles []editableArticle
 		for _, article := range articles {
 			// var authors string
@@ -169,6 +173,8 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 			// } else {
 			// 	authors = authortext(article.AuthorText, databaseAuthors[article.IssueIndex])
 			// }
+			articleOrder.WriteRune(',')
+			articleOrder.WriteString(strconv.Itoa(article.ID))
 
 			issueArticle := editableArticle{
 				ArticleID:      article.ID,
@@ -190,6 +196,7 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 			// "coverpage":  coverpage(issue.Coverpage),
 			"issueTitle":     issue.Title,
 			"publishingDate": issue.PublishingDate,
+			"articleOrder":   articleOrder.String(),
 			"articles":       editableArticles,
 		})
 	}
