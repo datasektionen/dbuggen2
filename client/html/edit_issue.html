@@ -22,7 +22,7 @@
 	</script>
 
     <main>
-		<form hx-post="save" hx-encoding="multipart/form-data">
+		<form hx-post="save" hx-target="#response" hx-encoding="multipart/form-data">
 			<!-- Information about the whole issue -->
 			<div class="issueInfo">
 				<label for="issueTitle">Title</label>
@@ -74,12 +74,13 @@
 				{{end}}
 			</div>
 
-			<input type="hidden" name="order" id="order-input">
+			<input type="hidden" name="order-input" id="order-input">
 
 			<hr>
 
 			<input type="submit" value="Save">
 		</form>
+		<div id="response"></div>
 
 		<button id="add-article-btn">Add New Article</button>
     </main>
