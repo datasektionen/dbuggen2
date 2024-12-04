@@ -123,7 +123,10 @@ func GetHomeIssues(db *sqlx.DB, darkmode bool) ([]HomeIssue, error) {
 func GetArticles(db *sqlx.DB, issue int, darkmode bool) ([]Article, error) {
 	var articles []Article
 
-	if err := db.Select(&articles, `SELECT * FROM Archive.Article WHERE issue=$1`, issue); err != nil {
+	if err := db.Select(&articles, `SELECT * FROM Archive.Article
+										WHERE issue=$1
+											ORDER BY issue_index`,
+		issue); err != nil {
 		log.Println(err)
 		return articles, err
 	}
