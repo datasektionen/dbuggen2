@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"dbuggen/server/database"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -23,7 +24,7 @@ func determineOrder(str string) ([]int, error) {
 	return order, nil
 }
 
-func extractArticleData(c *gin.Context, articleID int) (database.Article, error) {
+func extractArticleData(c *gin.Context, articleID int, index int, issue int) (database.Article, error) {
 	articleIDString := strconv.Itoa(articleID)
 	title := c.PostForm(articleIDString + "_Title")
 	// authors := c.PostForm(articleIDString + "_Authors")
@@ -37,12 +38,43 @@ func extractArticleData(c *gin.Context, articleID int) (database.Article, error)
 	article := database.Article{
 		ID:         articleID,
 		Title:      title,
-		Issue:      -1,
+		Issue:      issue,
 		AuthorText: authortext,
-		IssueIndex: -1,
+		IssueIndex: index,
 		Content:    content,
 		LastEdited: time.Now(),
 		N0lleSafe:  true,
 	}
 	return article, nil
+}
+
+func checkArticleInIssue(articleIDs []int, currentArticles []database.Article) ([]int, error) {
+	editedArticles := make([]bool, len(currentArticles))
+	for _, aID := range articleIDs {
+		if aID < 0 {
+			continue
+		}
+
+		inIssue := false
+		for i, article := range currentArticles {
+			if aID == article.ID {
+				inIssue = true
+				editedArticles[i] = true
+				break
+			}
+		}
+
+		if !inIssue {
+			return nil, fmt.Errorf("articleID %v is not in current issue and may not be edited", aID)
+		}
+	}
+
+	var articlesRemove []int
+	for i, b := range editedArticles {
+		if !b {
+			articlesRemove = append(articlesRemove, currentArticles[i].ID)
+		}
+	}
+
+	return articlesRemove, nil
 }

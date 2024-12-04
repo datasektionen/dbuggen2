@@ -669,7 +669,7 @@ func TestPathIntSeparator(t *testing.T) {
 		1}
 
 	for i := 0; i < len(param); i++ {
-		got, err := pathIntSeparator(param[i])
+		got, err := PathIntSeparator(param[i])
 		if err != nil {
 			t.Error(err)
 		}
@@ -687,7 +687,7 @@ func TestPathIntSeparator(t *testing.T) {
 	}
 
 	for i := 0; i < len(param2); i++ {
-		_, err := pathIntSeparator(param2[i])
+		_, err := PathIntSeparator(param2[i])
 		if err == nil {
 			t.Errorf(`expected error from string "%v"`, param2[i])
 		}

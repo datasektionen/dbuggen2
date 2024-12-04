@@ -66,7 +66,7 @@ func Issue(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	}
 
 	return func(c *gin.Context) {
-		issueID, err := pathIntSeparator(c.Param("issue"))
+		issueID, err := PathIntSeparator(c.Param("issue"))
 		if err != nil {
 			c.Redirect(http.StatusBadRequest, "/")
 			return
@@ -138,7 +138,7 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 	}
 
 	return func(c *gin.Context) {
-		issueID, err := pathIntSeparator(c.Param("issue"))
+		issueID, err := PathIntSeparator(c.Param("issue"))
 		if err != nil {
 			c.Redirect(http.StatusBadRequest, "/")
 			return
@@ -196,7 +196,7 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 			// "coverpage":  coverpage(issue.Coverpage),
 			"issueTitle":     issue.Title,
 			"publishingDate": issue.PublishingDate,
-			"articleOrder":   articleOrder.String(),
+			"articleOrder":   articleOrder.String()[1:], // remove first ','
 			"articles":       editableArticles,
 		})
 	}
@@ -205,8 +205,8 @@ func EditIssue(db *sqlx.DB) func(c *gin.Context) {
 // Arbitrary article
 func Article(db *sqlx.DB, ds *DarkmodeStatus) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		issueID, errI := pathIntSeparator(c.Param("issue"))
-		articleIndex, errA := pathIntSeparator(c.Param("article"))
+		issueID, errI := PathIntSeparator(c.Param("issue"))
+		articleIndex, errA := PathIntSeparator(c.Param("article"))
 		if errI != nil || errA != nil {
 			c.Redirect(http.StatusBadRequest, "")
 			return

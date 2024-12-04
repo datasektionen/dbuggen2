@@ -176,7 +176,7 @@ func GetAuthorsForIssue(db *sqlx.DB, issueID int) ([][]Author, error) {
 	var authoredArticles []authoredArticle
 	err := db.Select(&authoredArticles, `SELECT issue_index, kth_id, prefered_name FROM (
 											Archive.Member FULL JOIN (
-												Archive.Article FULL JOIN Archive.AuthoredBy ON 
+												Archive.Article FULL JOIN Archive.AuthoredBy ON
 												Archive.Article.id = Archive.AuthoredBy.article_id)
 												USING (kth_id))
 											WHERE issue=$1 AND kth_id IS NOT NULL
@@ -232,4 +232,41 @@ func GetActiveMembers(db *sqlx.DB) ([]Member, error) {
 	}
 
 	return members, nil
+}
+
+func UpdateIssue(db *sqlx.DB, articlesModify []Article, articlesNew []Article, articlesRemove []int) error {
+	tx := db.MustBegin()
+	for _, a := range articlesNew {
+		tx.MustExec(`INSERT INTO Archive.Article (
+							title,
+							issue,
+							author_text,
+							issue_index,
+							content,
+							last_edited,
+							n0lle_safe
+						) VALUES ($1, $2, $3, $4, $5, $6, $7)
+		`, a.Title, a.Issue, a.AuthorText, a.IssueIndex,
+			a.Content, a.LastEdited, a.N0lleSafe)
+	}
+
+	for _, a := range articlesModify {
+		tx.MustExec(`UPDATE Archive.Article SET
+							title=$2,
+							author_text=$3,
+							issue_index=$4,
+							content=$5,
+							last_edited=$6,
+							n0lle_safe=$7
+						WHERE id=$1
+		`, a.ID, a.Title, a.AuthorText, a.IssueIndex,
+			a.Content, a.LastEdited, a.N0lleSafe)
+	}
+
+	for _, id := range articlesRemove {
+		tx.MustExec(`DELETE FROM Archive.Article WHERE id=$1`, id)
+	}
+
+	err := tx.Commit()
+	return err
 }

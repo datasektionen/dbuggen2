@@ -252,7 +252,7 @@ func Darkmode(ds *DarkmodeStatus) bool {
 
 // Function to remove the "/" before parameters, which was
 // a problem. Turns "/123": string, into 123: int.
-func pathIntSeparator(paramRaw string) (int, error) {
+func PathIntSeparator(paramRaw string) (int, error) {
 	_, paramLessRaw, found := strings.Cut(paramRaw, "/")
 
 	if found {
