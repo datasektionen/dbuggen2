@@ -59,6 +59,7 @@
 					<label for={{.ArticleTitleID}}>Article title</label>
 					<br>
 					<input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
+					<button id="remove-article-btn" type="button" onclick="removeArticle({{.ArticleID}})">Delete</button>
 					<br>
 					<label for={{.AuthortextID}}>Author text</label>
 					<br>
@@ -74,7 +75,7 @@
 
 					<label for={{.ContentID}}>Content</label>
 					<br>
-					<input type="text" id={{.ContentID}} name={{.ContentID}} value={{.Content}}>
+					<textarea id={{.ContentID}} name={{.ContentID}} cols="60">{{.Content}}</textarea>
 					<br>
 				</div>
 				{{end}}
@@ -115,7 +116,7 @@
         <br>
         <label for="_Content">Content</label>
         <br>
-        <input type="text" id="_Content" name="_Content" placeholder="Enter content">
+        <textarea type="text" id="_Content" name="_Content" cols="60"></textarea>
         <br>
 	</div>
 </template>
@@ -127,7 +128,7 @@
 	*/
 	let articleCounter = -1;
 
-	document.getElementById('add-article-btn').addEventListener('click', function () {
+	document.getElementById('add-article-btn').addEventListener('click', function() {
 		const template = document.getElementById('new-article-template');
 		const articlesContainer = document.getElementById('article-container');
 
@@ -150,10 +151,33 @@
 		articlesContainer.appendChild(newArticle);
 
 		const orderForm = document.getElementById('order-input');
-		var order = orderForm.value
+		var order = orderForm.value;
 		orderForm.value = order.concat(",", articleCounter);
-		console.log(orderForm.value)
+		console.log(orderForm.value);
 
 		articleCounter--;
 	});
+
+	function removeArticle(articleID) {
+		console.log(articleID);
+		const article = document.getElementById(articleID)
+		console.log(article);
+		article.remove();
+		console.log("Removed ", article);
+		const orderForm = document.getElementById('order-input');
+		var order = orderForm.value;
+		console.log(order)
+		if (order.search("".concat(articleID, ",")) != -1) {
+			console.log(1)
+			order = order.replace("".concat(articleID, ","), "");
+		} else if(order.search(",".concat(articleID), "") != -1) {
+			console.log(2)
+			order = order.replace(",".concat(articleID), "", "");
+		} else {
+			console.log(3)
+			order = order.replace(articleID, "");
+		}
+		orderForm.value = order
+		console.log(orderForm.value);
+	};
 </script>
