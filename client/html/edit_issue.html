@@ -33,11 +33,11 @@
 			<div class="issueInfo">
 				<label for="issueTitle">Title</label>
 				<br>
-				<input type="text" id="issueTitle" name="issueTitle" value={{.issueTitle}}>
+				<input type="text" id="issueTitle" name="issueTitle" value="{{.issueTitle}}">
 				<br>
 				<label for="publishingDate">Publishing date</label>
 				<br>
-				<input type="datetime" id="publishingDate" name="publishingDate" value={{.publishingDate}}>
+				<input type="datetime" id="publishingDate" name="publishingDate" value="{{.publishingDate}}">
 				<br>
 				<label for="pdfFile">PDF version</label>
 				<br>
@@ -52,36 +52,36 @@
 			<!-- Information about individual articles -->
 			<div class="sortable" id="article-container">
 				{{range .articles}}
-				<div class="article-div" id={{.ArticleID}}>
+				<div class="article-div" id="{{.ArticleID}}">
 					<hr>
 
 					<h3 class="handle">::</h3>
-					<label for={{.ArticleTitleID}}>Article title</label>
+					<label for="{{.ArticleTitleID}}">Article title</label>
 					<br>
-					<input type="text" id={{.ArticleTitleID}} name={{.ArticleTitleID}} value={{.ArticleTitle}}>
-					<button id="remove-article-btn" type="button" onclick="removeArticle({{.ArticleID}})">Delete</button>
+					<input type="text" id="{{.ArticleTitleID}}" name="{{.ArticleTitleID}}" value="{{.ArticleTitle}}">
+					<button class="remove-article-btn" type="button" onclick="removeArticle({{.ArticleID}})">Delete</button>
 					<br>
-					<label for={{.AuthortextID}}>Author text</label>
+					<label for="{{.AuthortextID}}">Author text</label>
 					<br>
-					<input type="text" id={{.AuthortextID}} name={{.AuthortextID}} value={{.Authortext}}>
+					<input type="text" id="{{.AuthortextID}}" name="{{.AuthortextID}}" value="{{.Authortext}}">
 					<br>
-					<label for={{.AuthorsID}}>Authors</label>
+					<label for="{{.AuthorsID}}">Authors</label>
 					<br>
-					<input type="text" id={{.AuthorsID}} name={{.AuthorsID}} value={{.Authors}}>
+					<input type="text" id="{{.AuthorsID}}" name="{{.AuthorsID}}" value="{{.Authors}}">
 					<br>
-					<label for={{.NØlleSafeID}}>nØlle safe</label>
-					<input type="checkbox" id={{.NØlleSafeID}} name={{.NØlleSafeID}} value={{.NØllesafe}}>
+					<label for="{{.NØlleSafeID}}">nØlle safe</label>
+					<input type="checkbox" id="{{.NØlleSafeID}}" name="{{.NØlleSafeID}}" value="{{.NØllesafe}}">
 					<br>
 
-					<label for={{.ContentID}}>Content</label>
+					<label for="{{.ContentID}}">Content</label>
 					<br>
-					<textarea id={{.ContentID}} name={{.ContentID}} cols="60">{{.Content}}</textarea>
+					<textarea id="{{.ContentID}}" name="{{.ContentID}}" cols="60">{{.Content}}</textarea>
 					<br>
 				</div>
 				{{end}}
 			</div>
 
-			<input type="hidden" name="order-input" id="order-input" value={{.articleOrder}}>
+			<input type="hidden" name="order-input" id="order-input" value="{{.articleOrder}}">
 
 			<hr>
 
@@ -102,6 +102,7 @@
         <label for="_Title">Article title</label>
         <br>
         <input type="text" id="_Title" name="_Title" placeholder="Enter title">
+		<button class="remove-article-btn" type="button" onclick="">Delete</button>
         <br>
         <label for="_Authortext">Author text</label>
         <br>
@@ -148,36 +149,35 @@
 			}
 		});
 
+		const removeBtn = newArticle.querySelector('.remove-article-btn');
+		removeBtn.setAttribute('onclick', `removeArticle(${articleCounter})`)
+
 		articlesContainer.appendChild(newArticle);
 
 		const orderForm = document.getElementById('order-input');
 		var order = orderForm.value;
 		orderForm.value = order.concat(",", articleCounter);
-		console.log(orderForm.value);
+		console.log(orderForm.value)
 
 		articleCounter--;
 	});
 
 	function removeArticle(articleID) {
-		console.log(articleID);
 		const article = document.getElementById(articleID)
-		console.log(article);
-		article.remove();
+		if (confirm("Are you sure you want to delete this article?")) {
+			article.remove();
+		}
 		console.log("Removed ", article);
 		const orderForm = document.getElementById('order-input');
 		var order = orderForm.value;
-		console.log(order)
-		if (order.search("".concat(articleID, ",")) != -1) {
-			console.log(1)
-			order = order.replace("".concat(articleID, ","), "");
-		} else if(order.search(",".concat(articleID), "") != -1) {
-			console.log(2)
-			order = order.replace(",".concat(articleID), "", "");
+		if (order.search(`${articleID},`) != -1) {
+			order = order.replace(`${articleID},`, "");
+		} else if(order.search(`,${articleID}`, "") != -1) {
+			order = order.replace(`,${articleID}`, "", "");
 		} else {
-			console.log(3)
 			order = order.replace(articleID, "");
 		}
+		console.log(order)
 		orderForm.value = order
-		console.log(orderForm.value);
 	};
 </script>
