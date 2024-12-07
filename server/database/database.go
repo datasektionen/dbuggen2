@@ -270,6 +270,11 @@ func UpdateIssue(db *sqlx.DB, articlesModify []Article, articlesNew []Article, a
 		tx.MustExec(`DELETE FROM Archive.Article WHERE id=$1`, id)
 	}
 
-	err := tx.Commit()
-	return err
+	return tx.Commit()
+}
+
+func DeleteIssue(db *sqlx.DB, issue int) error {
+	tx := db.MustBegin()
+	tx.MustExec(`DELETE FROM Archive.Issue where id=$1`, issue)
+	return tx.Commit()
 }

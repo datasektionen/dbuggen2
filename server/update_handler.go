@@ -57,3 +57,18 @@ func saveIssue(db *sqlx.DB) func(c *gin.Context) {
 		}
 	}
 }
+
+func deleteIssue(db *sqlx.DB) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		issue, err := client.PathIntSeparator(c.Param("issue"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "")
+			return
+		}
+		err = database.DeleteIssue(db, issue)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "")
+			return
+		}
+	}
+}
